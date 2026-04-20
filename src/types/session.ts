@@ -5,6 +5,21 @@ export interface SparklinePoint {
   label?: string;
 }
 
+/**
+ * F1 — Assumptions (Expert AI / UpToDate pattern).
+ * Each hypothesis declares the clinical context it assumes to be true.
+ * Doctor can mark as verified (✓), false (✗) or keep as assumed (?).
+ * Toggling triggers re-analysis so the confidence recalibrates.
+ */
+export type AssumptionState = "assumed" | "verified" | "false";
+
+export interface Assumption {
+  id: string;
+  text: string;
+  state: AssumptionState;
+  source?: string;
+}
+
 export interface Hypothesis {
   id: string;
   label: string;
@@ -16,6 +31,7 @@ export interface Hypothesis {
   sparkline: SparklinePoint[];
   rationale?: string;
   citations?: string[];
+  assumptions?: Assumption[];
 }
 
 export type RedFlagSeverity = "high" | "medium" | "low";
@@ -55,11 +71,25 @@ export interface ChecklistItem {
   result?: string;
 }
 
+export type NextQuestionKind = "suggestion" | "nudge";
+
+/**
+ * F2 — When `kind === "nudge"`, a critical clinical datum is missing.
+ * The question blocks or biases a hypothesis; UI treats it as an alert.
+ */
+export interface MissingContext {
+  field: string; // e.g. "idade confirmada", "PA aferida", "última medicação"
+  severity: "critical" | "warning";
+  blocksHypothesisIcd10?: string;
+}
+
 export interface NextQuestionSuggestion {
   id: string;
   question: string;
   reason: string;
   impact: string;
+  kind?: NextQuestionKind;
+  missingContext?: MissingContext;
 }
 
 export interface SoapSections {

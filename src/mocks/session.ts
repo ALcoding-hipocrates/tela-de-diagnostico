@@ -40,6 +40,29 @@ export const mockHypotheses: Hypothesis[] = [
       { value: 48, label: "tontura postural confirmada" },
       { value: 68, label: "PA aferida 150/95" },
     ],
+    assumptions: [
+      {
+        id: "a-h1-1",
+        text: "Paciente não gestante",
+        state: "assumed",
+        source: "sbc-has-2020-crise",
+      },
+      {
+        id: "a-h1-2",
+        text: "Sem uso crônico de AINE",
+        state: "assumed",
+      },
+      {
+        id: "a-h1-3",
+        text: "Sem anticoncepcional de alta dose",
+        state: "assumed",
+      },
+      {
+        id: "a-h1-4",
+        text: "Sem histórico familiar direto de HAS",
+        state: "assumed",
+      },
+    ],
   },
   {
     id: "h2",
@@ -54,6 +77,19 @@ export const mockHypotheses: Hypothesis[] = [
       { value: 30, label: "relato de cefaleia frontal" },
       { value: 22, label: "palpação cervical sem tensão" },
     ],
+    assumptions: [
+      {
+        id: "a-h2-1",
+        text: "Sem sinais neurológicos focais",
+        state: "assumed",
+        source: "abn-cefaleia-2022",
+      },
+      {
+        id: "a-h2-2",
+        text: "Cefaleia bilateral, não pulsátil",
+        state: "verified",
+      },
+    ],
   },
   {
     id: "h3",
@@ -67,6 +103,18 @@ export const mockHypotheses: Hypothesis[] = [
       { value: 25, label: "início" },
       { value: 18, label: "sem fotofobia" },
       { value: 8, label: "sem aura visual" },
+    ],
+    assumptions: [
+      {
+        id: "a-h3-1",
+        text: "Sem fotofobia",
+        state: "verified",
+      },
+      {
+        id: "a-h3-2",
+        text: "Sem aura visual ou sensitiva",
+        state: "verified",
+      },
     ],
   },
 ];
@@ -169,9 +217,17 @@ export const mockExamRecommendations: ExamRecommendation[] = [
 
 export const mockNextQuestion: NextQuestionSuggestion = {
   id: "q1",
-  question: "A dor torácica irradia para o braço ou mandíbula?",
-  reason: "Descarta síndrome coronariana aguda (SCA)",
-  impact: "SCA +30% ou −25% · HAS ±4%",
+  kind: "nudge",
+  question: "Idade da paciente confirmada?",
+  reason:
+    "Cefaleia + hipertensão após os 50 anos requer investigação diferente (afastar arterite temporal, tumor cerebral).",
+  impact:
+    "Sem a idade, não consigo afastar diagnósticos secundários críticos.",
+  missingContext: {
+    field: "Idade confirmada",
+    severity: "critical",
+    blocksHypothesisIcd10: "I67.4",
+  },
 };
 
 export const mockRedFlags: RedFlag[] = [

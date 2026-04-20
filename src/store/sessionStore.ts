@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type {
+  AssumptionState,
   ChecklistItem,
   Exam,
   ExamRecommendation,
@@ -121,6 +122,13 @@ interface SessionState {
   dismissNextQuestion: () => void;
   useNextQuestion: () => void;
   toggleMessageSpeaker: (messageId: string) => void;
+
+  /** F1: altera estado de uma premissa de uma hipótese. */
+  setAssumptionState: (
+    icd10: string,
+    assumptionId: string,
+    state: AssumptionState
+  ) => void;
 
   toasts: ToastItem[];
   pushToast: (t: Omit<ToastItem, "id">) => void;
@@ -336,6 +344,25 @@ export const useSessionStore = create<SessionState>((set) => ({
           ? [...prev.sparkline, sparklinePoint]
           : [{ value: to, label: "análise inicial" }, sparklinePoint];
 
+        // F1: merge assumptions. A IA emite premissas novas; preservamos
+        // state ("verified"/"false") que o médico setou em premissas equivalentes.
+        const prevAssumptionByText = new Map(
+          (prev?.assumptions ?? []).map((a) => [a.text.toLowerCase().trim(), a])
+        );
+        const mergedAssumptions = ai.assumptions
+          ? ai.assumptions.map((aa, i) => {
+              const existing = prevAssumptionByText.get(
+                aa.text.toLowerCase().trim()
+              );
+              return {
+                id: existing?.id ?? `a-${ai.icd10}-${i}-${Date.now()}`,
+                text: aa.text,
+                state: (existing?.state ?? "assumed") as AssumptionState,
+                source: aa.source ?? existing?.source,
+              };
+            })
+          : prev?.assumptions;
+
         return {
           id: prev?.id ?? `h-ai-${idx}-${Date.now()}`,
           label: ai.label,
@@ -346,7 +373,11 @@ export const useSessionStore = create<SessionState>((set) => ({
           trigger: ai.rationale,
           rationale: ai.rationale,
           sparkline,
-          citations: ai.citations && ai.citations.length > 0 ? ai.citations : prev?.citations,
+          citations:
+            ai.citations && ai.citations.length > 0
+              ? ai.citations
+              : prev?.citations,
+          assumptions: mergedAssumptions,
         };
       });
 
@@ -519,6 +550,19 @@ export const useSessionStore = create<SessionState>((set) => ({
           ...item,
           speaker: item.speaker === "doctor" ? "patient" : "doctor",
           autoLabeled: false,
+        };
+      }),
+    })),
+
+  setAssumptionState: (icd10, assumptionId, newState) =>
+    set((s) => ({
+      hypotheses: s.hypotheses.map((h) => {
+        if (h.icd10 !== icd10 || !h.assumptions) return h;
+        return {
+          ...h,
+          assumptions: h.assumptions.map((a) =>
+            a.id === assumptionId ? { ...a, state: newState } : a
+          ),
         };
       }),
     })),

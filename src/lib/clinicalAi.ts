@@ -1,6 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { formatGuidelineLibrary } from "@/data/guidelines";
 
+export interface AiAssumption {
+  text: string;
+  source?: string;
+}
+
 export interface AiHypothesis {
   label: string;
   icd10: string;
@@ -8,12 +13,27 @@ export interface AiHypothesis {
   status: "active" | "investigating" | "discarded";
   rationale: string;
   citations: string[];
+  /**
+   * F1 — Premissas clínicas que a IA está assumindo ao calcular a confiança.
+   * Cada premissa que o médico marcar como falsa deve fazer a IA recalibrar
+   * na próxima análise.
+   */
+  assumptions?: AiAssumption[];
+}
+
+export interface AiMissingContext {
+  field: string;
+  severity: "critical" | "warning";
+  blocksHypothesisIcd10?: string;
 }
 
 export interface AiNextQuestion {
   question: string;
   reason: string;
   impact: string;
+  /** F2 — "nudge" = dado crítico faltando que bloqueia raciocínio. */
+  kind?: "suggestion" | "nudge";
+  missingContext?: AiMissingContext;
 }
 
 export interface AiSpeakerAssignment {
@@ -76,8 +96,11 @@ INSTRUÇÕES:
    - Confiança 0-100 calibrada pelas evidências REAIS no diálogo (não invente sinais)
    - Status: "active" (hipótese em curso com evidência positiva), "investigating" (plausível mas sem evidência suficiente), "discarded" (evidência negativa clara ou substituída)
    - Justificativa breve e específica citando fragmentos do que foi dito
+   - assumptions (2-5 premissas): DECLARE EXPLICITAMENTE as premissas clínicas que você está tomando como verdadeiras para chegar nesse percentual. Exemplo: crise HAS 68% — "paciente não gestante", "sem uso crônico de AINE", "sem anticoncepcional de alta dose". Escreva em PT-BR curto. Essas premissas servem como proteção (médico pode corrigir se alguma for falsa) e pedagogia (médico percebe o que pode ter esquecido).
 
-2. UMA próxima pergunta clínica de maior poder discriminativo entre as hipóteses ativas, com razão (qual hipótese ajuda a descartar/confirmar) e impacto esperado em pontos percentuais.
+2. UMA próxima pergunta clínica, OU modo nudge quando faltar dado crítico:
+   - kind "suggestion" (default): a melhor pergunta discriminativa entre hipóteses ativas.
+   - kind "nudge": use SOMENTE quando um dado clinicamente crítico está FALTANDO e bloqueia raciocínio seguro (ex: idade não dita em consulta de cefaleia suspeita de tumor, uso de anticoagulante não perguntado em suspeita de sangramento, PA não aferida em suspeita de crise HAS). Nesse caso preencha missingContext {field, severity, blocksHypothesisIcd10}. Use nudge com parcimônia — só quando é realmente bloqueador, não pra sugestões normais.
 
 3. Re-rotulagem de falantes: o sistema de captura de áudio não separa médico e paciente automaticamente. Mensagens capturadas por microfone vêm marcadas com "(auto)" e um ID. Para CADA mensagem marcada com "(auto)", decida pelo conteúdo quem está falando:
    - MÉDICO: pergunta clínica, orientação, prescrição, aferição, terminologia técnica em 1ª pessoa
@@ -150,13 +173,34 @@ const CLINICAL_TOOL: Anthropic.Tool = {
                 "IDs de guidelines da biblioteca que fundamentam esta hipótese. Use IDs exatos. Array vazio se nenhum guideline se aplica.",
               items: { type: "string" },
             },
+            assumptions: {
+              type: "array",
+              description:
+                "Premissas clínicas declaradas (2-5 por hipótese). Cada premissa é uma afirmação concreta que você está assumindo verdadeira para chegar na confiança atual (ex: 'paciente não gestante', 'sem uso crônico de AINE'). Se o médico marcar uma premissa como falsa no futuro, você deve recalibrar. Omita premissas óbvias ou não-acionáveis.",
+              items: {
+                type: "object",
+                properties: {
+                  text: {
+                    type: "string",
+                    description:
+                      "Declaração clínica curta em PT-BR (ex: 'Sem histórico de trauma craniano recente')",
+                  },
+                  source: {
+                    type: "string",
+                    description:
+                      "ID opcional do guideline que motivou essa premissa",
+                  },
+                },
+                required: ["text"],
+              },
+            },
           },
           required: ["label", "icd10", "confidence", "status", "rationale", "citations"],
         },
       },
       nextQuestion: {
         description:
-          "Única próxima pergunta clínica mais útil, ou null se ainda não há informação suficiente",
+          "Única próxima pergunta clínica mais útil, ou null se ainda não há informação suficiente. Use kind='nudge' quando um dado crítico está FALTANDO e bloqueia ou enviesa uma hipótese importante — esse modo é alerta forte, não sugestão casual.",
         anyOf: [
           {
             type: "object",
@@ -174,6 +218,34 @@ const CLINICAL_TOOL: Anthropic.Tool = {
                 type: "string",
                 description:
                   "Impacto esperado em pontos percentuais nas hipóteses (ex: 'SCA +30% ou −25%')",
+              },
+              kind: {
+                type: "string",
+                enum: ["suggestion", "nudge"],
+                description:
+                  "'suggestion' = pergunta que ajuda a discriminar. 'nudge' = dado crítico faltando (idade, PA, medicação em uso, comorbidade grave) que impede a IA de fazer raciocínio seguro. Use 'nudge' com parcimônia — só quando realmente bloqueia hipótese clinicamente relevante.",
+              },
+              missingContext: {
+                type: "object",
+                description:
+                  "Obrigatório quando kind='nudge'. Descreve o dado que está faltando.",
+                properties: {
+                  field: {
+                    type: "string",
+                    description:
+                      "Nome do dado faltando em PT-BR (ex: 'Idade confirmada', 'PA em repouso', 'Uso de anticoagulante')",
+                  },
+                  severity: {
+                    type: "string",
+                    enum: ["critical", "warning"],
+                  },
+                  blocksHypothesisIcd10: {
+                    type: "string",
+                    description:
+                      "CID-10 da hipótese que fica bloqueada sem esse dado (opcional)",
+                  },
+                },
+                required: ["field", "severity"],
               },
             },
             required: ["question", "reason", "impact"],

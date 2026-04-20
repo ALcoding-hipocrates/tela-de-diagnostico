@@ -5,6 +5,7 @@ import { cn } from "@/lib/cn";
 import { getGuidelineById, formatGuidelineHeader } from "@/data/guidelines";
 import { CidCode } from "../shared/CidCode";
 import { Sparkline } from "./Sparkline";
+import { AssumptionsList } from "./AssumptionsList";
 
 interface HypothesisCardProps {
   hypothesis: Hypothesis;
@@ -103,6 +104,12 @@ export function HypothesisCard({ hypothesis, forceExpanded = false }: Hypothesis
         <div className="px-6 py-5">
           {header}
           {progressBar}
+          {hypothesis.assumptions && hypothesis.assumptions.length > 0 && (
+            <AssumptionsList
+              icd10={icd10}
+              assumptions={hypothesis.assumptions}
+            />
+          )}
         </div>
       ) : (
         <button
