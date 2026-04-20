@@ -1,0 +1,184 @@
+@import "./styles/tokens.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    font-family: theme("fontFamily.sans");
+    font-weight: 400;
+    font-size: 15px;
+    color: var(--color-ink-900);
+    background: var(--color-background);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /*
+    Apple-like display treatment: sans at large sizes, tight tracking,
+    semibold-ish weight. No serif.
+  */
+  .font-display {
+    font-family: theme("fontFamily.sans");
+    letter-spacing: -0.022em;
+    font-weight: 700;
+  }
+  html.dark body {
+    background: linear-gradient(
+      180deg,
+      #0d1217 0%,
+      #0f1419 40%,
+      #0f1419 60%,
+      #0d1217 100%
+    );
+  }
+
+  :root {
+    --shadow-card-base: 0 1px 0 rgba(15, 20, 25, 0.02);
+    --shadow-card-raised: 0 2px 6px -2px rgba(15, 20, 25, 0.06),
+      0 1px 0 rgba(15, 20, 25, 0.02);
+    --shadow-card-floating: 0 12px 24px -10px rgba(11, 122, 62, 0.12),
+      0 4px 10px -4px rgba(15, 20, 25, 0.08);
+  }
+
+  html.dark {
+    --shadow-card-base: 0 1px 0 rgba(0, 0, 0, 0.25);
+    --shadow-card-raised: 0 2px 6px -2px rgba(0, 0, 0, 0.45),
+      0 1px 0 rgba(0, 0, 0, 0.3);
+    --shadow-card-floating: 0 12px 24px -10px rgba(16, 162, 86, 0.25),
+      0 4px 10px -4px rgba(0, 0, 0, 0.4);
+  }
+
+  html.dark [class*="border-black/"] {
+    border-color: rgba(238, 242, 246, 0.08);
+  }
+  html.dark [class*="bg-black/"]:not(:hover) {
+    background-color: rgba(238, 242, 246, 0.04);
+  }
+  html.dark [class*="hover:bg-black/"]:hover {
+    background-color: rgba(238, 242, 246, 0.08);
+  }
+
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  [role="tab"]:focus-visible,
+  [role="menuitem"]:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px rgba(11, 122, 62, 0.35);
+    border-radius: 0.375rem;
+  }
+}
+
+@layer utilities {
+  @keyframes hp-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes hp-pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.97) translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  @keyframes hp-slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes hp-shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  @keyframes hp-success-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(11, 122, 62, 0.35),
+        0 1px 0 rgba(15, 20, 25, 0.02);
+      border-color: rgba(11, 122, 62, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(11, 122, 62, 0.12),
+        0 2px 6px -2px rgba(11, 122, 62, 0.2);
+      border-color: rgba(11, 122, 62, 0.4);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(11, 122, 62, 0),
+        0 1px 0 rgba(15, 20, 25, 0.02);
+    }
+  }
+  @keyframes hp-number-bump {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+    40% {
+      transform: translateY(-2px) scale(1.06);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes hp-row-flash {
+    0% {
+      background-color: rgba(11, 122, 62, 0);
+    }
+    30% {
+      background-color: rgba(11, 122, 62, 0.1);
+    }
+    100% {
+      background-color: rgba(11, 122, 62, 0);
+    }
+  }
+  .animate-fade-in {
+    animation: hp-fade-in 150ms ease-out;
+  }
+  .animate-pop-in {
+    animation: hp-pop-in 160ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  .animate-slide-in {
+    animation: hp-slide-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  .hp-shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(15, 20, 25, 0.04) 0%,
+      rgba(15, 20, 25, 0.08) 50%,
+      rgba(15, 20, 25, 0.04) 100%
+    );
+    background-size: 200% 100%;
+    animation: hp-shimmer 1.4s ease-in-out infinite;
+  }
+  .animate-success-pulse {
+    animation: hp-success-pulse 900ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  .animate-number-bump {
+    animation: hp-number-bump 450ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  .animate-row-flash {
+    animation: hp-row-flash 900ms ease-out;
+  }
+}

@@ -1,0 +1,62 @@
+/*
+  Design principles (Apple / DeepScribe-inspired, sober clinical):
+  - Radii: rounded-md (6px) inputs/buttons · rounded-lg (8px) cards · rounded-full pills/avatars.
+  - Borders: minimal. Prefer subtle bg shift or shadow to delimit surfaces.
+  - Typography: weights 500 / 600 / 700 only. Sizes 11 / 12 / 13 / 14 / 15 / 18 / 24 / 32.
+  - Green: reserved for (1) primary CTAs, (2) active status, (3) principal hypothesis,
+    (4) positive confidence delta, (5) brand anchors (session badge, mic fab). Nowhere else.
+  - Everything else: ink scale (near-black / grey / white).
+*/
+
+:root {
+  /* Brand green */
+  --color-clinical: #0b7a3e;
+  --color-clinical-700: #085f30;
+  /* Hypothesis/delta highlight — brighter emerald for progress bars (mockup style) */
+  --color-emerald-glow: #34d399;
+
+  /* Ink */
+  --color-ink-900: #1a1a1a;
+  --color-ink-600: #64748b;
+  --color-ink-400: #94a3b8;
+
+  /* Surface */
+  --color-surface: #ffffff;
+  --color-surface-raised: #fafafa;
+  --color-background: #fcfcfd;
+
+  /* Alerts */
+  --color-danger: #c0382c;
+  --color-warning: #b87407;
+
+  /* Peach alert palette (from mockup) */
+  --color-peach: #fef5f2;
+  --color-peach-border: #f9e8e2;
+  --color-peach-text: #8c5b4d;
+
+  --overlay-hairline: rgba(10, 14, 19, 0.06);
+  --overlay-soft: rgba(10, 14, 19, 0.03);
+  --overlay-hover: rgba(10, 14, 19, 0.04);
+
+  --drawer-width: 420px;
+  --summary-bar-height: 56px;
+}
+
+html.dark {
+  --color-clinical: #10a256;
+  --color-clinical-700: #25c06c;
+
+  --color-ink-900: #eef2f6;
+  --color-ink-600: #a8b3bf;
+  --color-ink-400: #6a7582;
+
+  --color-surface: #0f1419;
+  --color-surface-raised: #161c23;
+
+  --color-danger: #e15a51;
+  --color-warning: #d4a436;
+
+  --overlay-hairline: rgba(238, 242, 246, 0.08);
+  --overlay-soft: rgba(238, 242, 246, 0.05);
+  --overlay-hover: rgba(238, 242, 246, 0.06);
+}
