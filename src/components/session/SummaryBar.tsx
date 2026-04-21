@@ -18,6 +18,7 @@ import {
 import { detectCriticalMoments } from "@/lib/criticalMoments";
 import { cn } from "@/lib/cn";
 import { CriticalMomentsSummarySlot } from "./CriticalMomentsSummarySlot";
+import { BillingLive } from "./BillingLive";
 
 export function SummaryBar() {
   const hypotheses = useSessionStore((s) => s.hypotheses);
@@ -87,6 +88,8 @@ export function SummaryBar() {
           )
         }
       />
+      <Divider />
+      <BillingLive />
     </header>
   );
 }

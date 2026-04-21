@@ -45,7 +45,10 @@ export type ModalId =
   | "account"
   | "avs"
   | "referral"
-  | "commandPalette";
+  | "commandPalette"
+  | "handoff"
+  | "audit"
+  | "preBrief";
 
 export type ToastTone = "success" | "info" | "danger";
 

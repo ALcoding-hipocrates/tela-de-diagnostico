@@ -10,6 +10,8 @@ import {
   Send,
   ChevronDown,
   Search,
+  ClipboardList,
+  Shield,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useSessionStore } from "@/store/sessionStore";
@@ -22,6 +24,8 @@ import { Button } from "./shared/Button";
 import { SettingsModal } from "./modals/SettingsModal";
 import { AccountModal } from "./modals/AccountModal";
 import { DocumentModal } from "./modals/DocumentModal";
+import { HandoffModal } from "./modals/HandoffModal";
+import { AuditModal } from "./modals/AuditModal";
 
 function mergeSoap(
   ai: SoapSections | null,
@@ -53,6 +57,16 @@ export function TopBar() {
         <div className="flex items-center gap-2">
           <CommandTrigger onClick={() => openModal("commandPalette")} />
           <Timer />
+          <Button
+            variant="secondary"
+            size="sm"
+            aria-label="Passagem de plantão"
+            title="Gerar snapshot pra passagem de plantão"
+            onClick={() => openModal("handoff")}
+            leadingIcon={<ClipboardList size={13} />}
+          >
+            Passagem
+          </Button>
           <div className="flex items-center gap-0.5" data-tour="export">
             <ExportMenu
               onAvs={() => openModal("avs")}
@@ -64,6 +78,16 @@ export function TopBar() {
               description="Gere documentos a partir da consulta: nota SOAP em PDF, FHIR Bundle pra prontuários (Tasy/MV/iClinic/Amplimed), resumo pós-consulta pro paciente (AVS) ou carta de encaminhamento pra especialista."
             />
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label="Auditoria"
+            title="Rastro de auditoria do raciocínio"
+            onClick={() => openModal("audit")}
+            className="h-8 w-8 px-0"
+          >
+            <Shield size={16} />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -97,6 +121,14 @@ export function TopBar() {
         open={activeModal === "referral"}
         onClose={closeModal}
         kind="referral"
+      />
+      <HandoffModal
+        open={activeModal === "handoff"}
+        onClose={closeModal}
+      />
+      <AuditModal
+        open={activeModal === "audit"}
+        onClose={closeModal}
       />
     </>
   );
