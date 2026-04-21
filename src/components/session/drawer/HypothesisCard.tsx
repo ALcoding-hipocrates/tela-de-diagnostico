@@ -7,6 +7,7 @@ import { CidCode } from "../shared/CidCode";
 import { Sparkline } from "./Sparkline";
 import { AssumptionsList } from "./AssumptionsList";
 import { EvidenceFlowTree } from "./EvidenceFlowTree";
+import { FeedbackThumbs } from "../shared/FeedbackThumbs";
 
 interface HypothesisCardProps {
   hypothesis: Hypothesis;
@@ -102,7 +103,7 @@ export function HypothesisCard({ hypothesis, forceExpanded = false }: Hypothesis
       )}
     >
       {forceExpanded ? (
-        <div className="px-6 py-5">
+        <div className="group px-6 py-5">
           {header}
           {progressBar}
           {hypothesis.assumptions && hypothesis.assumptions.length > 0 && (
@@ -111,6 +112,15 @@ export function HypothesisCard({ hypothesis, forceExpanded = false }: Hypothesis
               assumptions={hypothesis.assumptions}
             />
           )}
+          <div className="mt-4 flex items-center justify-between border-t border-black/[0.05] pt-3">
+            <span className="text-[10px] font-medium text-ink-400">
+              Essa hipótese foi útil?
+            </span>
+            <FeedbackThumbs
+              target={{ kind: "hypothesis", icd10 }}
+              size="sm"
+            />
+          </div>
         </div>
       ) : (
         <button

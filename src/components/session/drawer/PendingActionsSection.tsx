@@ -15,6 +15,7 @@ import { useSessionStore } from "@/store/sessionStore";
 import { getGuidelineById, formatGuidelineHeader } from "@/data/guidelines";
 import { cn } from "@/lib/cn";
 import { ChecklistItemRow } from "./ChecklistItemRow";
+import { FeedbackThumbs } from "../shared/FeedbackThumbs";
 
 const PRIORITY_ORDER: Record<ExamPriority, number> = {
   urgent: 0,
@@ -111,7 +112,7 @@ function ExamRecItem({ rec }: { rec: ExamRecommendation }) {
   const isUrgent = rec.priority === "urgent";
 
   return (
-    <li className="flex items-start gap-2.5 px-3 py-2.5">
+    <li className="group flex items-start gap-2.5 px-3 py-2.5">
       <span
         className={cn(
           "mt-0.5 shrink-0",
@@ -161,6 +162,11 @@ function ExamRecItem({ rec }: { rec: ExamRecommendation }) {
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
+        <FeedbackThumbs
+          target={{ kind: "exam-recommendation", recId: rec.id }}
+          size="sm"
+          hidden
+        />
         <button
           type="button"
           onClick={() => accept(rec.id)}

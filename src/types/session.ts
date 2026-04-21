@@ -208,6 +208,25 @@ export interface InconsistencyFlag {
   suggestion: string; // como reconciliar
 }
 
+/**
+ * M10 — Feedback em tempo real do médico sobre sugestões da IA.
+ * Usado pra personalizar modelo + métricas internas.
+ */
+export type FeedbackTarget =
+  | { kind: "hypothesis"; icd10: string }
+  | { kind: "next-question"; questionId: string }
+  | { kind: "exam-recommendation"; recId: string };
+
+export type FeedbackVote = "up" | "down";
+
+export interface FeedbackEntry {
+  id: string;
+  target: FeedbackTarget;
+  vote: FeedbackVote;
+  timestamp: number;
+  note?: string;
+}
+
 export type TranscriptItem =
   | {
       kind: "message";

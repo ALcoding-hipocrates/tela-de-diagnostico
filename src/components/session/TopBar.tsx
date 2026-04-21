@@ -28,6 +28,7 @@ import { DocumentModal } from "./modals/DocumentModal";
 import { HandoffModal } from "./modals/HandoffModal";
 import { AuditModal } from "./modals/AuditModal";
 import { PreBriefModal } from "./modals/PreBriefModal";
+import { SpecialtyPicker } from "./SpecialtyPicker";
 
 function mergeSoap(
   ai: SoapSections | null,
@@ -51,9 +52,10 @@ export function TopBar() {
   return (
     <>
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-black/[0.06] bg-surface px-5">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Logo />
           <SessionBadge />
+          <SpecialtyPicker />
         </div>
         <PatientCard />
         <div className="flex items-center gap-2">

@@ -2,6 +2,7 @@ import { Sparkles, X, Zap } from "lucide-react";
 import { useSessionStore } from "@/store/sessionStore";
 import { describeCid } from "@/data/cidDictionary";
 import { cn } from "@/lib/cn";
+import { FeedbackThumbs } from "../shared/FeedbackThumbs";
 
 export function NextQuestion() {
   const q = useSessionStore((s) => s.nextQuestion);
@@ -61,13 +62,19 @@ function SuggestionVariant({ q, dismiss, use }: VariantProps) {
         </dd>
       </dl>
 
-      <button
-        type="button"
-        onClick={use}
-        className="mt-3 inline-flex h-9 items-center justify-center rounded-full bg-clinical px-4 text-[13px] font-semibold tracking-tight text-white transition-colors hover:bg-clinical-700"
-      >
-        Usar pergunta
-      </button>
+      <div className="mt-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={use}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-clinical px-4 text-[13px] font-semibold tracking-tight text-white transition-colors hover:bg-clinical-700"
+        >
+          Usar pergunta
+        </button>
+        <FeedbackThumbs
+          target={{ kind: "next-question", questionId: q.id }}
+          size="sm"
+        />
+      </div>
     </section>
   );
 }

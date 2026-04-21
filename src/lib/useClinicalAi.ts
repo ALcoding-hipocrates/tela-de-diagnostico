@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSessionStore } from "@/store/sessionStore";
 import type { TranscriptItem } from "@/types/session";
+import { getSpecialty } from "@/data/specialtyConfig";
 import { analyzeTranscript, isApiConfigured } from "./clinicalAi";
 
 const MIN_NEW_MESSAGES = 2;
@@ -28,6 +29,7 @@ export function useClinicalAi() {
   const transcript = useSessionStore((s) => s.transcript);
   const setAnalysisState = useSessionStore((s) => s.setAnalysisState);
   const mergeAnalysis = useSessionStore((s) => s.mergeAnalysis);
+  const specialtyId = useSessionStore((s) => s.specialty);
 
   const lastTriggerAtRef = useRef(0);
   const lastProcessedCountRef = useRef<number | null>(null);
@@ -61,7 +63,12 @@ export function useClinicalAi() {
       setAnalysisState("analyzing");
       try {
         const text = formatTranscriptForLlm(transcript);
-        const analysis = await analyzeTranscript(text);
+        const specialty = getSpecialty(specialtyId);
+        const contextualText = `CONTEXTO DA ESPECIALIDADE: ${specialty.label} — ${specialty.description}
+Priorize diretrizes e hipóteses relevantes a esta especialidade. CID-10 comuns: ${specialty.commonCids.map((c) => `${c.code}=${c.label}`).join(", ")}.
+
+${text}`;
+        const analysis = await analyzeTranscript(contextualText);
         mergeAnalysis(analysis);
         setAnalysisState("idle");
       } catch (e) {
@@ -71,7 +78,7 @@ export function useClinicalAi() {
         inFlightRef.current = false;
       }
     })();
-  }, [transcript, analysisEnabled, setAnalysisState, mergeAnalysis]);
+  }, [transcript, analysisEnabled, specialtyId, setAnalysisState, mergeAnalysis]);
 
   return { enabled: isApiConfigured() && analysisEnabled };
 }

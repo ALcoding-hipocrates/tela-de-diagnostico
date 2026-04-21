@@ -4,6 +4,9 @@ import type {
   ChecklistItem,
   Exam,
   ExamRecommendation,
+  FeedbackEntry,
+  FeedbackTarget,
+  FeedbackVote,
   Hypothesis,
   HypothesisShift,
   NextQuestionSuggestion,
@@ -20,6 +23,7 @@ import {
   mockNextQuestion,
   mockTranscript,
 } from "@/mocks/session";
+import type { SpecialtyId } from "@/data/specialtyConfig";
 import { nextTimestamp } from "@/lib/sessionSelectors";
 import { bayesianDelta } from "@/lib/bayesian";
 import type { AiAnalysis } from "@/lib/clinicalAi";
@@ -137,6 +141,15 @@ interface SessionState {
   preBrief: string | null;
   setPreBrief: (brief: string | null) => void;
 
+  /** M10: feedback do médico (persiste em localStorage entre sessões). */
+  feedback: FeedbackEntry[];
+  recordFeedback: (target: FeedbackTarget, vote: FeedbackVote) => void;
+  clearFeedback: (target: FeedbackTarget) => void;
+
+  /** M6: especialidade ativa da sessão (filtra guidelines/calcs/red flags). */
+  specialty: SpecialtyId;
+  setSpecialty: (id: SpecialtyId) => void;
+
   toasts: ToastItem[];
   pushToast: (t: Omit<ToastItem, "id">) => void;
   dismissToast: (id: string) => void;
@@ -144,6 +157,34 @@ interface SessionState {
 
 function clamp(n: number, min = 0, max = 100) {
   return Math.max(min, Math.min(max, n));
+}
+
+const FEEDBACK_STORAGE_KEY = "hipocrates:feedback-v1";
+
+function feedbackKey(target: FeedbackTarget): string {
+  if (target.kind === "hypothesis") return `h:${target.icd10}`;
+  if (target.kind === "next-question") return `q:${target.questionId}`;
+  return `e:${target.recId}`;
+}
+
+function loadFeedback(): FeedbackEntry[] {
+  try {
+    const raw = localStorage.getItem(FEEDBACK_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+function persistFeedback(list: FeedbackEntry[]): void {
+  try {
+    localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(list));
+  } catch {
+    /* ignore */
+  }
 }
 
 function shortLabelFromIcd(label: string): string {
@@ -624,6 +665,49 @@ export const useSessionStore = create<SessionState>((set) => ({
 
   preBrief: null,
   setPreBrief: (brief) => set({ preBrief: brief }),
+
+  specialty: (() => {
+    try {
+      const raw = localStorage.getItem("hipocrates:specialty");
+      if (raw) return raw as SpecialtyId;
+    } catch {
+      /* ignore */
+    }
+    return "general" as SpecialtyId;
+  })(),
+  setSpecialty: (id) => {
+    try {
+      localStorage.setItem("hipocrates:specialty", id);
+    } catch {
+      /* ignore */
+    }
+    set({ specialty: id });
+  },
+
+  feedback: loadFeedback(),
+  recordFeedback: (target, vote) =>
+    set((s) => {
+      const key = feedbackKey(target);
+      const filtered = s.feedback.filter((f) => feedbackKey(f.target) !== key);
+      const next: FeedbackEntry[] = [
+        ...filtered,
+        {
+          id: `fb-${Date.now()}`,
+          target,
+          vote,
+          timestamp: Date.now(),
+        },
+      ];
+      persistFeedback(next);
+      return { feedback: next };
+    }),
+  clearFeedback: (target) =>
+    set((s) => {
+      const key = feedbackKey(target);
+      const next = s.feedback.filter((f) => feedbackKey(f.target) !== key);
+      persistFeedback(next);
+      return { feedback: next };
+    }),
 
   toasts: [],
   pushToast: (t) =>
