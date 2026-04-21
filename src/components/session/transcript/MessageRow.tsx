@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { Sparkles } from "lucide-react";
 import type {
   HypothesisShift,
+  InconsistencyFlag,
   TranscriptRedFlagRef,
   TranscriptSpeaker,
 } from "@/types/session";
@@ -10,6 +11,7 @@ import { useSessionStore } from "@/store/sessionStore";
 import { cn } from "@/lib/cn";
 import { RedFlagMark } from "./RedFlagMark";
 import { ShiftImpactPopover } from "./ShiftImpactPopover";
+import { InconsistencyChip } from "./InconsistencyChip";
 
 interface MessageRowProps {
   id: string;
@@ -19,6 +21,7 @@ interface MessageRowProps {
   redFlags?: TranscriptRedFlagRef[];
   autoLabeled?: boolean;
   triggeredShifts?: HypothesisShift[];
+  inconsistencies?: InconsistencyFlag[];
 }
 
 export function MessageRow({
@@ -29,10 +32,12 @@ export function MessageRow({
   redFlags,
   autoLabeled,
   triggeredShifts,
+  inconsistencies,
 }: MessageRowProps) {
   const toggleSpeaker = useSessionStore((s) => s.toggleMessageSpeaker);
   const isDoctor = speaker === "doctor";
   const hasShifts = triggeredShifts && triggeredShifts.length > 0;
+  const hasIncs = inconsistencies && inconsistencies.length > 0;
 
   return (
     <div
@@ -95,6 +100,12 @@ export function MessageRow({
                     : "afetou raciocínio"}
                 </span>
               </ShiftImpactPopover>
+            </>
+          )}
+          {hasIncs && (
+            <>
+              {" "}
+              <InconsistencyChip flags={inconsistencies} />
             </>
           )}
         </p>

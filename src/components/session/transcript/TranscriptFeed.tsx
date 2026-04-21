@@ -32,6 +32,7 @@ export function TranscriptFeed() {
               redFlags={item.redFlags}
               autoLabeled={item.autoLabeled}
               triggeredShifts={shiftsAfterMessage(transcript, item.id)}
+              inconsistencies={item.inconsistencies}
             />
           ) : (
             <HypothesisShiftChip

@@ -424,6 +424,32 @@ export const useSessionStore = create<SessionState>((set) => ({
         });
       }
 
+      // M8: attach inconsistencies to their target messages
+      if (analysis.inconsistencies && analysis.inconsistencies.length > 0) {
+        const incByMsg = new Map<
+          string,
+          Array<(typeof analysis.inconsistencies)[number]>
+        >();
+        for (const inc of analysis.inconsistencies) {
+          if (!incByMsg.has(inc.messageId)) incByMsg.set(inc.messageId, []);
+          incByMsg.get(inc.messageId)!.push(inc);
+        }
+        newTranscript = newTranscript.map((item) => {
+          if (item.kind !== "message") return item;
+          const aiIncs = incByMsg.get(item.id);
+          if (!aiIncs) return item;
+          const flags = aiIncs.map((i, idx) => ({
+            id: `inc-${item.id}-${idx}-${Date.now()}`,
+            kind: i.kind,
+            currentStatement: i.currentStatement,
+            priorContext: i.priorContext,
+            severity: i.severity,
+            suggestion: i.suggestion,
+          }));
+          return { ...item, inconsistencies: flags };
+        });
+      }
+
       if (shifts.length > 0) {
         newTranscript = [
           ...newTranscript,

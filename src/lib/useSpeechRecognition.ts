@@ -2,6 +2,12 @@ import { useCallback, useEffect, useRef } from "react";
 import { useSessionStore } from "@/store/sessionStore";
 import { nextTimestamp } from "./sessionSelectors";
 import { detectRedFlags } from "./redFlagDetection";
+import {
+  classifyMacro,
+  extractCommand,
+  isMacroConfigured,
+  type MacroAction,
+} from "./voiceMacros";
 
 interface SpeechRecognitionLike {
   continuous: boolean;
@@ -23,6 +29,101 @@ function getCtor(): SpeechRecognitionCtor | null {
     webkitSpeechRecognition?: SpeechRecognitionCtor;
   };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+async function handleMacro(command: string): Promise<void> {
+  const store = useSessionStore.getState();
+  store.pushToast({
+    tone: "info",
+    title: "Comando recebido",
+    description: `"${command}"`,
+  });
+  try {
+    const result = await classifyMacro(command);
+    executeMacroAction(result.action);
+    store.pushToast({
+      tone: "success",
+      title: "Comando executado",
+      description: result.confirmation,
+    });
+  } catch (e) {
+    store.pushToast({
+      tone: "danger",
+      title: "Falha no comando",
+      description: e instanceof Error ? e.message : "Não entendi.",
+    });
+  }
+}
+
+function executeMacroAction(a: MacroAction): void {
+  const store = useSessionStore.getState();
+  switch (a.kind) {
+    case "add_prescription":
+      if (a.medication) {
+        store.addPrescription({
+          medicationId: `voice-${Date.now()}`,
+          medicationName: a.medication,
+          medicationClass: "—",
+          dose: a.dose ?? "—",
+          route: "oral",
+          frequency: a.frequency ?? "—",
+          duration: a.duration ?? "—",
+          status: "new",
+        });
+      }
+      break;
+    case "request_exams":
+      if (a.panels && a.panels.length > 0) {
+        for (const name of a.panels) {
+          store.addExam({
+            panelId: name.toLowerCase().replace(/\s+/g, "-"),
+            panelName: name,
+          });
+        }
+      }
+      break;
+    case "check_item":
+      if (a.label) {
+        const match = store.checklist.find((c) =>
+          c.label.toLowerCase().includes(a.label!.toLowerCase())
+        );
+        if (match) {
+          store.checkItem(match.id, a.result);
+        }
+      }
+      break;
+    case "verify_assumption":
+      if (a.text) {
+        const hypotheses = a.icd10
+          ? store.hypotheses.filter((h) => h.icd10 === a.icd10)
+          : store.hypotheses;
+        for (const h of hypotheses) {
+          const match = h.assumptions?.find((as) =>
+            as.text.toLowerCase().includes(a.text!.toLowerCase())
+          );
+          if (match) {
+            store.setAssumptionState(h.icd10, match.id, a.state);
+          }
+        }
+      }
+      break;
+    case "mark_red_flag":
+      // Add a message marking the red flag trigger
+      store.addMessage({
+        speaker: "doctor",
+        text: `[Red flag marcado por voz: ${a.label}]`,
+        timestampSec: nextTimestamp(store.transcript, 2),
+      });
+      break;
+    case "unknown":
+      // Fallback: add raw as a doctor note
+      store.addMessage({
+        speaker: "doctor",
+        text: a.raw,
+        timestampSec: nextTimestamp(store.transcript, 2),
+      });
+      break;
+  }
 }
 
 export function useSpeechRecognition() {
@@ -59,6 +160,12 @@ export function useSpeechRecognition() {
         if (result.isFinal) {
           const text = result[0].transcript.trim();
           if (text) {
+            // M7: se começa com wake word, é comando de voz
+            const command = extractCommand(text);
+            if (command && isMacroConfigured()) {
+              void handleMacro(command);
+              continue;
+            }
             const state = useSessionStore.getState();
             state.addMessage({
               speaker: "doctor",

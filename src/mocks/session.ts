@@ -360,6 +360,18 @@ export const mockTranscript: TranscriptItem[] = [
     speaker: "patient",
     text: "Sim, quando levanto rápido da cama fico bem tonta.",
     timestampSec: 48,
+    inconsistencies: [
+      {
+        id: "inc-m4-1",
+        kind: "discrepancy",
+        currentStatement: "fico bem tonta quando levanto rápido",
+        priorContext:
+          "Prontuário 2 meses atrás: 'nega episódios de tontura, PA 140/85 no consultório'.",
+        severity: "warning",
+        suggestion:
+          "Confirmar se a tontura é nova ou se já ocorria e não foi relatada. Aferir PA em pé/deitado (ortostatismo).",
+      },
+    ],
   },
   {
     kind: "shift",

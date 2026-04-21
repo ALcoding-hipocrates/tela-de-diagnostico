@@ -194,6 +194,20 @@ export interface HypothesisShift {
   rationale?: string;
 }
 
+/**
+ * M8 — Patient Reliability / Inconsistency Flag
+ * Quando o que o paciente fala hoje contradiz histórico prévio ou dado
+ * medido. Valor: salva o médico cansado de errar por info inconsistente.
+ */
+export interface InconsistencyFlag {
+  id: string;
+  kind: "contradiction" | "omission" | "discrepancy";
+  currentStatement: string; // o que paciente disse agora
+  priorContext: string; // o que contradiz
+  severity: "warning" | "critical";
+  suggestion: string; // como reconciliar
+}
+
 export type TranscriptItem =
   | {
       kind: "message";
@@ -203,6 +217,8 @@ export type TranscriptItem =
       timestampSec: number;
       redFlags?: TranscriptRedFlagRef[];
       autoLabeled?: boolean;
+      /** M8: Inconsistências que a IA detectou nesta fala. */
+      inconsistencies?: InconsistencyFlag[];
     }
   | {
       kind: "shift";

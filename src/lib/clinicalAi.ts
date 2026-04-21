@@ -54,6 +54,19 @@ export interface AiSpeakerAssignment {
   speaker: "doctor" | "patient";
 }
 
+/**
+ * M8 — Inconsistência detectada numa fala específica do paciente.
+ * A IA associa por messageId pra renderizar chip inline na transcrição.
+ */
+export interface AiInconsistencyDetection {
+  messageId: string;
+  kind: "contradiction" | "omission" | "discrepancy";
+  currentStatement: string;
+  priorContext: string;
+  severity: "warning" | "critical";
+  suggestion: string;
+}
+
 export interface AiSoapSections {
   subjective: string;
   objective: string;
@@ -76,6 +89,7 @@ export interface AiAnalysis {
   speakerAssignments: AiSpeakerAssignment[];
   soapSections: AiSoapSections;
   examRecommendations: AiExamRecommendation[];
+  inconsistencies?: AiInconsistencyDetection[];
 }
 
 const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
@@ -372,6 +386,51 @@ const CLINICAL_TOOL: Anthropic.Tool = {
             },
           },
           required: ["panelName", "priority", "rationale"],
+        },
+      },
+      inconsistencies: {
+        type: "array",
+        description:
+          "Inconsistências detectadas entre o que o paciente disse AGORA e contexto prévio (brief pré-consulta, histórico, aferições anteriores, falas contraditórias da mesma consulta). Associa à mensagem específica por messageId. Use parcimônia — só quando realmente útil clinicamente (ex: paciente diz 'nunca tive HAS' mas prontuário tem Enalapril; paciente diz 'PA sempre 120/80' mas última aferição foi 180/110). Array vazio se nada a sinalizar.",
+        items: {
+          type: "object",
+          properties: {
+            messageId: {
+              type: "string",
+              description: "ID exato da mensagem do paciente (como aparece na transcrição)",
+            },
+            kind: {
+              type: "string",
+              enum: ["contradiction", "omission", "discrepancy"],
+              description:
+                "contradiction=contradiz algo prévio · omission=omitiu info conhecida · discrepancy=difere de medição objetiva",
+            },
+            currentStatement: {
+              type: "string",
+              description: "Trecho curto do que o paciente disse agora",
+            },
+            priorContext: {
+              type: "string",
+              description:
+                "O que contradiz (citação do prontuário, aferição, fala prévia na mesma consulta)",
+            },
+            severity: {
+              type: "string",
+              enum: ["warning", "critical"],
+            },
+            suggestion: {
+              type: "string",
+              description: "Como reconciliar em 1-2 frases",
+            },
+          },
+          required: [
+            "messageId",
+            "kind",
+            "currentStatement",
+            "priorContext",
+            "severity",
+            "suggestion",
+          ],
         },
       },
     },
