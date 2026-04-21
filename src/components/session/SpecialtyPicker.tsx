@@ -15,6 +15,7 @@ import {
   getSpecialty,
   type SpecialtyId,
 } from "@/data/specialtyConfig";
+import { InfoPopover } from "./shared/InfoPopover";
 import { cn } from "@/lib/cn";
 
 const ICONS = {
@@ -68,7 +69,7 @@ export function SpecialtyPicker() {
   };
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative flex items-center gap-0.5">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -84,6 +85,12 @@ export function SpecialtyPicker() {
           className={cn("text-ink-400 transition-transform", open && "rotate-180")}
         />
       </button>
+      <InfoPopover
+        align="left"
+        title="Modo especialidade"
+        description="Filtra diretrizes, calculadoras, CIDs sugeridos e red flags de acordo com sua especialidade. A IA passa a considerar o contexto clínico adequado — Cardio, Neuro, Pediatria, Psiquiatria, Emergência ou Geral."
+      />
+    </div>
 
       {open && (
         <div

@@ -3,6 +3,7 @@ import { useSessionStore } from "@/store/sessionStore";
 import { describeCid } from "@/data/cidDictionary";
 import { cn } from "@/lib/cn";
 import { FeedbackThumbs } from "../shared/FeedbackThumbs";
+import { InfoPopover } from "../shared/InfoPopover";
 
 export function NextQuestion() {
   const q = useSessionStore((s) => s.nextQuestion);
@@ -39,6 +40,11 @@ function SuggestionVariant({ q, dismiss, use }: VariantProps) {
         <span className="text-[10px] font-bold uppercase tracking-ultra text-ink-900">
           Próxima pergunta
         </span>
+        <InfoPopover
+          align="center"
+          title="Próxima pergunta sugerida"
+          description="A IA sugere UMA pergunta por vez com maior poder discriminativo entre as hipóteses ativas. Mostra a razão clínica e o impacto esperado em pontos percentuais. Modo nudge aparece quando um dado crítico está faltando e bloqueia raciocínio seguro."
+        />
         <button
           type="button"
           onClick={dismiss}

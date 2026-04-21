@@ -11,6 +11,7 @@ import {
   HypothesisEmptyIllustration,
 } from "./shared/EmptyState";
 import { AnalyzingIndicator } from "./shared/AnalyzingIndicator";
+import { InfoPopover } from "./shared/InfoPopover";
 import { NextQuestion } from "./drawer/NextQuestion";
 import { SoapLivePanel } from "./drawer/SoapLivePanel";
 import { ReasoningModal } from "./modals/ReasoningModal";
@@ -94,9 +95,16 @@ export function Drawer() {
                 <>
                   <section className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-[10px] font-bold uppercase tracking-ultra text-ink-400">
-                        Cognitive support
-                      </h3>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-[10px] font-bold uppercase tracking-ultra text-ink-400">
+                          Apoio cognitivo
+                        </h3>
+                        <InfoPopover
+                          align="left"
+                          title="Apoio cognitivo"
+                          description="Hipóteses diagnósticas em tempo real com CID-10 e confiança. Clique em 'Ver raciocínio' pra entender como a IA chegou ao resultado, quais diretrizes foram consultadas e quais premissas estão sendo assumidas."
+                        />
+                      </div>
                       <button
                         type="button"
                         onClick={() => setReasoningOpen(true)}

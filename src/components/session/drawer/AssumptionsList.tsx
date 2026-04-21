@@ -2,6 +2,7 @@ import { Check, X, HelpCircle } from "lucide-react";
 import type { Assumption, AssumptionState } from "@/types/session";
 import { useSessionStore } from "@/store/sessionStore";
 import { cn } from "@/lib/cn";
+import { InfoPopover } from "../shared/InfoPopover";
 
 interface AssumptionsListProps {
   icd10: string;
@@ -28,9 +29,16 @@ export function AssumptionsList({ icd10, assumptions }: AssumptionsListProps) {
   return (
     <section className="mt-5">
       <header className="mb-2 flex items-baseline justify-between">
-        <h4 className="text-[9px] font-bold uppercase tracking-ultra text-ink-400">
-          Premissas assumidas
-        </h4>
+        <div className="flex items-center gap-1.5">
+          <h4 className="text-[9px] font-bold uppercase tracking-ultra text-ink-400">
+            Premissas assumidas
+          </h4>
+          <InfoPopover
+            align="left"
+            title="Premissas clínicas"
+            description="A IA declara explicitamente o que está assumindo pra chegar nessa confiança (ex: paciente não gestante, sem AINE crônico). Clique pra cicla entre ? (assumida), ✓ (verificada) e ✗ (falsa). Marcar falsa faz a IA recalibrar."
+          />
+        </div>
         <span className="text-[10px] text-ink-400">
           Clique pra confirmar / contestar
         </span>

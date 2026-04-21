@@ -2,37 +2,27 @@ import { useEffect } from "react";
 import { useClinicalAi } from "@/lib/useClinicalAi";
 import { useSessionStore } from "@/store/sessionStore";
 import { mockPatient } from "@/mocks/session";
-import { LeftRail } from "./LeftRail";
-import { MainSession } from "./MainSession";
-import { RightPanel } from "./RightPanel";
+import { TopBar } from "./TopBar";
+import { SummaryBar } from "./SummaryBar";
+import { MainStage } from "./MainStage";
+import { BottomBar } from "./BottomBar";
+import { Drawer } from "./Drawer";
 import { CommandPalette } from "./CommandPalette";
 import { Tour } from "./Tour";
 import { ToastHost } from "./shared/ToastHost";
-import { SettingsModal } from "./modals/SettingsModal";
-import { AccountModal } from "./modals/AccountModal";
-import { DocumentModal } from "./modals/DocumentModal";
-import { HandoffModal } from "./modals/HandoffModal";
-import { AuditModal } from "./modals/AuditModal";
-import { PreBriefModal } from "./modals/PreBriefModal";
-import { TimelineModal } from "./modals/TimelineModal";
-import { AiModal } from "./modals/AiModal";
-import { PrescriptionModal } from "./modals/PrescriptionModal";
-import { ExamsModal } from "./modals/ExamsModal";
-import { ProtocolsModal } from "./modals/ProtocolsModal";
-import { CalculatorsModal } from "./modals/CalculatorsModal";
 
 /**
- * 3-zone editorial layout (estilo Stitch mockup + DeepScribe):
- *   [LeftRail 88px] [Main flex-1] [RightPanel 440px]
- *   + FloatingControls overlay no bottom do Main
- *   + Modais acessíveis via shortcuts e botões
+ * Layout clássico com Drawer retrátil à direita.
+ *   TopBar
+ *   SummaryBar
+ *   [ MainStage | Drawer (retractable right) ]
+ *   BottomBar
  */
 export function ClinicalSession() {
   useClinicalAi();
   const isRecording = useSessionStore((s) => s.isRecording);
   const openModal = useSessionStore((s) => s.openModal);
   const activeModal = useSessionStore((s) => s.activeModal);
-  const closeModal = useSessionStore((s) => s.closeModal);
   const darkMode = useSessionStore((s) => s.darkMode);
 
   useEffect(() => {
@@ -69,44 +59,19 @@ export function ClinicalSession() {
   }, [openModal, activeModal]);
 
   return (
-    <div className="flex h-full">
-      <LeftRail />
-      <MainSession />
-      <RightPanel />
-
-      {/* Overlays globais */}
+    <div className="flex h-full flex-col">
+      <TopBar />
+      <SummaryBar />
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <MainStage />
+        </div>
+        <Drawer />
+      </div>
+      <BottomBar />
       <CommandPalette />
       <Tour />
       <ToastHost />
-
-      {/* Modais */}
-      <SettingsModal open={activeModal === "settings"} onClose={closeModal} />
-      <AccountModal open={activeModal === "account"} onClose={closeModal} />
-      <DocumentModal
-        open={activeModal === "avs"}
-        onClose={closeModal}
-        kind="avs"
-      />
-      <DocumentModal
-        open={activeModal === "referral"}
-        onClose={closeModal}
-        kind="referral"
-      />
-      <HandoffModal open={activeModal === "handoff"} onClose={closeModal} />
-      <AuditModal open={activeModal === "audit"} onClose={closeModal} />
-      <PreBriefModal open={activeModal === "preBrief"} onClose={closeModal} />
-      <TimelineModal open={activeModal === "timeline"} onClose={closeModal} />
-      <AiModal open={activeModal === "ai"} onClose={closeModal} />
-      <PrescriptionModal
-        open={activeModal === "prescription"}
-        onClose={closeModal}
-      />
-      <ExamsModal open={activeModal === "exams"} onClose={closeModal} />
-      <ProtocolsModal open={activeModal === "protocols"} onClose={closeModal} />
-      <CalculatorsModal
-        open={activeModal === "calculators"}
-        onClose={closeModal}
-      />
     </div>
   );
 }

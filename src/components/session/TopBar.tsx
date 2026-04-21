@@ -61,26 +61,40 @@ export function TopBar() {
         <div className="flex items-center gap-2">
           <CommandTrigger onClick={() => openModal("commandPalette")} />
           <Timer />
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Brief pré-consulta"
-            title="Gerar brief com notas prévias antes de iniciar"
-            onClick={() => openModal("preBrief")}
-            leadingIcon={<Sparkles size={13} />}
-          >
-            Brief
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            aria-label="Passagem de plantão"
-            title="Gerar snapshot pra passagem de plantão"
-            onClick={() => openModal("handoff")}
-            leadingIcon={<ClipboardList size={13} />}
-          >
-            Passagem
-          </Button>
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label="Brief pré-consulta"
+              title="Gerar brief com notas prévias antes de iniciar"
+              onClick={() => openModal("preBrief")}
+              leadingIcon={<Sparkles size={13} />}
+            >
+              Brief
+            </Button>
+            <InfoPopover
+              align="center"
+              title="Brief pré-consulta"
+              description="Cole notas do prontuário anterior, exames recentes ou recepção. A IA gera um resumo em 5 segundos: suspeitas iniciais, red flags históricas, perguntas-chave e medicações a reconciliar — pra você entrar na consulta já em contexto."
+            />
+          </div>
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="secondary"
+              size="sm"
+              aria-label="Passagem de plantão"
+              title="Gerar snapshot pra passagem de plantão"
+              onClick={() => openModal("handoff")}
+              leadingIcon={<ClipboardList size={13} />}
+            >
+              Passagem
+            </Button>
+            <InfoPopover
+              align="center"
+              title="Passagem de plantão"
+              description="Snapshot em 1 tela pro próximo médico assumir em 30 segundos: hipóteses com confiança, red flags ativas, premissas editáveis, prescrições, pendências e diretrizes consultadas. Exporta como markdown, PDF ou imprime."
+            />
+          </div>
           <div className="flex items-center gap-0.5" data-tour="export">
             <ExportMenu
               onAvs={() => openModal("avs")}
@@ -92,16 +106,23 @@ export function TopBar() {
               description="Gere documentos a partir da consulta: nota SOAP em PDF, FHIR Bundle pra prontuários (Tasy/MV/iClinic/Amplimed), resumo pós-consulta pro paciente (AVS) ou carta de encaminhamento pra especialista."
             />
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Auditoria"
-            title="Rastro de auditoria do raciocínio"
-            onClick={() => openModal("audit")}
-            className="h-8 w-8 px-0"
-          >
-            <Shield size={16} />
-          </Button>
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label="Auditoria"
+              title="Rastro de auditoria do raciocínio"
+              onClick={() => openModal("audit")}
+              className="h-8 w-8 px-0"
+            >
+              <Shield size={16} />
+            </Button>
+            <InfoPopover
+              align="right"
+              title="Auditoria de raciocínio"
+              description="Rastro completo de cada decisão da IA nesta consulta: atualizações de confiança, diretrizes consultadas, premissas verificadas/contestadas, red flags detectadas. Exportável em markdown — CFM-friendly, audit-ready."
+            />
+          </div>
           <Button
             variant="ghost"
             size="sm"
