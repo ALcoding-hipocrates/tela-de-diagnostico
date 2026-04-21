@@ -64,7 +64,7 @@ export function PendingActionsSection() {
     <section className="flex flex-col gap-2">
       <header className="flex items-baseline justify-between">
         <h3 className="text-[10px] font-bold uppercase tracking-ultra text-ink-400">
-          Differential checklist
+          Próximas ações
         </h3>
         <span className="font-mono text-label font-medium text-ink-400">
           {visible.length === 0

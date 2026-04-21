@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { X, AlertCircle, Brain, FileText } from "lucide-react";
+import { X, AlertCircle, Brain, FileText, Sparkles } from "lucide-react";
 import { useSessionStore } from "@/store/sessionStore";
 import { cn } from "@/lib/cn";
 import { HypothesisCard } from "./drawer/HypothesisCard";
-import { HypothesisRow } from "./drawer/HypothesisRow";
+import { HypothesisListRow } from "./drawer/HypothesisListRow";
 import { HypothesisSkeleton } from "./drawer/HypothesisSkeleton";
 import { PendingActionsSection } from "./drawer/PendingActionsSection";
+import { SymptomsTimeline } from "./drawer/SymptomsTimeline";
 import {
   EmptyState,
   HypothesisEmptyIllustration,
@@ -90,82 +91,80 @@ export function Drawer() {
 
         <div className="flex flex-1 flex-col overflow-y-auto">
           {tab === "cognitive" ? (
-            <div className="flex flex-col gap-4 px-5 py-5">
-              {focused ? (
-                <>
-                  <section className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <h3 className="text-[10px] font-bold uppercase tracking-ultra text-ink-400">
-                          Apoio cognitivo
-                        </h3>
-                        <InfoPopover
-                          align="left"
-                          title="Apoio cognitivo"
-                          description="Hipóteses diagnósticas em tempo real com CID-10 e confiança. Clique em 'Ver raciocínio' pra entender como a IA chegou ao resultado, quais diretrizes foram consultadas e quais premissas estão sendo assumidas."
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setReasoningOpen(true)}
-                        title="Ver raciocínio detalhado da IA"
-                        className="flex h-6 items-center gap-1 rounded-md border border-clinical/25 bg-clinical/[0.06] px-2 text-[11px] font-semibold text-clinical-700 hover:border-clinical/50 hover:bg-clinical/10"
-                      >
-                        <Brain size={11} /> Ver raciocínio
-                      </button>
-                    </div>
-                    <div key={focused.icd10} className="animate-slide-in">
-                      <HypothesisCard hypothesis={focused} forceExpanded />
-                    </div>
-                  </section>
+            <div className="flex flex-col gap-6 px-5 py-5">
+              {/* Header "Raciocínio clínico" estilo mockup */}
+              <section>
+                <header className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={13} className="text-clinical-700" />
+                    <h3 className="text-[13px] font-semibold tracking-tight text-ink-900">
+                      Raciocínio clínico
+                    </h3>
+                    <InfoPopover
+                      align="left"
+                      title="Raciocínio clínico"
+                      description="Hipóteses diagnósticas ranqueadas por confiança bayesiana. Clique em uma pra ver o raciocínio detalhado (evidências +/-, premissas, citações)."
+                    />
+                  </div>
+                  {focused && (
+                    <button
+                      type="button"
+                      onClick={() => setReasoningOpen(true)}
+                      title="Ver raciocínio detalhado da hipótese principal"
+                      className="flex h-6 items-center gap-1 rounded-full border border-clinical/25 bg-clinical/[0.06] px-2.5 text-[10.5px] font-semibold text-clinical-700 hover:bg-clinical/10"
+                    >
+                      <Brain size={11} /> Ver raciocínio
+                    </button>
+                  )}
+                </header>
 
-                  {others.length > 0 && (
-                    <section className="flex flex-col gap-1">
-                      <h3 className="flex items-baseline justify-between text-[10px] font-bold uppercase tracking-ultra text-ink-400">
-                        <span>Outras hipóteses</span>
-                        <span className="font-mono font-medium text-ink-400">
-                          {others.length}
-                        </span>
-                      </h3>
-                      <div className="flex flex-col">
-                        {others.map((h) => (
-                          <HypothesisRow
+                {hypotheses.length > 0 ? (
+                  <div>
+                    <h4 className="mb-2 text-[10px] font-bold uppercase tracking-ultra text-ink-400">
+                      Hipóteses diagnósticas
+                    </h4>
+                    <div className="flex flex-col gap-0.5">
+                      {[...hypotheses]
+                        .sort((a, b) => b.confidence - a.confidence)
+                        .map((h, i) => (
+                          <HypothesisListRow
                             key={h.id}
                             hypothesis={h}
-                            onFocus={() => setFocusedIcd10(h.icd10)}
+                            principal={i === 0 && h.icd10 === focused?.icd10}
+                            onClick={() => setFocusedIcd10(h.icd10)}
                           />
                         ))}
-                      </div>
-                    </section>
-                  )}
-                </>
-              ) : analysisState === "analyzing" ? (
-                <section className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-label font-semibold text-ink-400">
-                      Hipótese principal
-                    </h3>
-                    <AnalyzingIndicator />
+                    </div>
                   </div>
-                  <HypothesisSkeleton />
-                </section>
-              ) : (
-                <EmptyHypothesesState />
-              )}
+                ) : analysisState === "analyzing" ? (
+                  <div className="flex flex-col gap-2">
+                    <AnalyzingIndicator />
+                    <HypothesisSkeleton />
+                  </div>
+                ) : (
+                  <EmptyHypothesesState />
+                )}
 
-              <div
-                aria-hidden
-                className="border-t border-black/[0.04]"
-              />
+                {focusedIcd10 && focused && (
+                  <details className="mt-3 rounded-[14px] border border-black/[0.05] bg-surface">
+                    <summary className="cursor-pointer list-none px-4 py-2.5 text-[11px] font-semibold text-ink-600 hover:text-ink-900">
+                      Detalhes de {focused.label} ▾
+                    </summary>
+                    <div className="border-t border-black/[0.04] p-3">
+                      <HypothesisCard hypothesis={focused} forceExpanded />
+                    </div>
+                  </details>
+                )}
+              </section>
 
+              {/* Próximas ações */}
               <PendingActionsSection />
 
-              {showNext && (
-                <>
-                  <div aria-hidden className="border-t border-black/[0.04]" />
-                  <NextQuestion />
-                </>
-              )}
+              {/* Próxima pergunta / nudge */}
+              {showNext && <NextQuestion />}
+
+              {/* Timeline dos sintomas */}
+              <SymptomsTimeline />
             </div>
           ) : (
             <SoapLivePanel />
