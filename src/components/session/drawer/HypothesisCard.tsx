@@ -6,6 +6,7 @@ import { getGuidelineById, formatGuidelineHeader } from "@/data/guidelines";
 import { CidCode } from "../shared/CidCode";
 import { Sparkline } from "./Sparkline";
 import { AssumptionsList } from "./AssumptionsList";
+import { EvidenceFlowTree } from "./EvidenceFlowTree";
 
 interface HypothesisCardProps {
   hypothesis: Hypothesis;
@@ -164,7 +165,7 @@ export function HypothesisCard({ hypothesis, forceExpanded = false }: Hypothesis
             </div>
           )}
 
-          {canBreakdown && (
+          {(canBreakdown || (hypothesis.evidence && hypothesis.evidence.length > 0)) && (
             <>
               <button
                 type="button"
@@ -186,7 +187,13 @@ export function HypothesisCard({ hypothesis, forceExpanded = false }: Hypothesis
               </button>
 
               {breakdownExpanded && (
-                <ConfidenceBreakdown sparkline={sparkline} hypothesis={hypothesis} />
+                <div className="mt-2">
+                  {hypothesis.evidence && hypothesis.evidence.length > 0 ? (
+                    <EvidenceFlowTree hypothesis={hypothesis} />
+                  ) : (
+                    <ConfidenceBreakdown sparkline={sparkline} hypothesis={hypothesis} />
+                  )}
+                </div>
               )}
             </>
           )}

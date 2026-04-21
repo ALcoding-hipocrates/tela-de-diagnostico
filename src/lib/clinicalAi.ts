@@ -6,6 +6,13 @@ export interface AiAssumption {
   source?: string;
 }
 
+export interface AiEvidence {
+  kind: "positive" | "negative" | "missing";
+  text: string;
+  weight: number;
+  source?: string;
+}
+
 export interface AiHypothesis {
   label: string;
   icd10: string;
@@ -19,6 +26,12 @@ export interface AiHypothesis {
    * na próxima análise.
    */
   assumptions?: AiAssumption[];
+  /**
+   * M3 — Evidências discriminadas (positivas, negativas, faltantes).
+   * Usadas no "Evidence Flow Tree" — visualização de como a IA chegou
+   * na confiança atual.
+   */
+  evidence?: AiEvidence[];
 }
 
 export interface AiMissingContext {
@@ -195,6 +208,35 @@ const CLINICAL_TOOL: Anthropic.Tool = {
                   },
                 },
                 required: ["text"],
+              },
+            },
+            evidence: {
+              type: "array",
+              description:
+                "Discrimine as evidências que pesaram na confiança atual (3-8 itens total). Separe em 3 tipos: positivas (elevam a confiança), negativas (reduzem) e faltantes (ainda não temos mas seriam decisivas). Cada item tem weight: valor absoluto do peso em pontos de confiança (ex: PA aferida subiu 20%, então weight=20 kind=positive). Para missing, weight é o ganho POTENCIAL se a evidência se confirmar.",
+              items: {
+                type: "object",
+                properties: {
+                  kind: {
+                    type: "string",
+                    enum: ["positive", "negative", "missing"],
+                  },
+                  text: {
+                    type: "string",
+                    description:
+                      "Evidência concreta em PT-BR curto (ex: 'PA aferida 150/95', 'Sem aura visual', 'Fundo de olho')",
+                  },
+                  weight: {
+                    type: "number",
+                    description:
+                      "Magnitude em pontos de confiança (positive: use 1-40, negative: 1-40, missing: 5-40 potencial)",
+                  },
+                  source: {
+                    type: "string",
+                    description: "ID opcional do guideline",
+                  },
+                },
+                required: ["kind", "text", "weight"],
               },
             },
           },

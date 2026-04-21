@@ -20,6 +20,22 @@ export interface Assumption {
   source?: string;
 }
 
+/**
+ * M3 — Evidence Flow Tree.
+ * Discrimina as evidências que a IA usou pra chegar na confiança atual.
+ * Visualiza "como pensou" em formato de árvore 2D.
+ */
+export type EvidenceKind = "positive" | "negative" | "missing";
+
+export interface Evidence {
+  id: string;
+  kind: EvidenceKind;
+  text: string;
+  /** Quanto contribuiu (+/-). Pra "missing", é o potencial. */
+  weight: number;
+  source?: string;
+}
+
 export interface Hypothesis {
   id: string;
   label: string;
@@ -32,6 +48,7 @@ export interface Hypothesis {
   rationale?: string;
   citations?: string[];
   assumptions?: Assumption[];
+  evidence?: Evidence[];
 }
 
 export type RedFlagSeverity = "high" | "medium" | "low";

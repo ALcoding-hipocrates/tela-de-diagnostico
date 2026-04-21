@@ -133,6 +133,10 @@ interface SessionState {
     state: AssumptionState
   ) => void;
 
+  /** M2: Pre-consultation brief (markdown gerado pela IA). */
+  preBrief: string | null;
+  setPreBrief: (brief: string | null) => void;
+
   toasts: ToastItem[];
   pushToast: (t: Omit<ToastItem, "id">) => void;
   dismissToast: (id: string) => void;
@@ -377,6 +381,16 @@ export const useSessionStore = create<SessionState>((set) => ({
             })
           : prev?.assumptions;
 
+        const mergedEvidence = ai.evidence
+          ? ai.evidence.map((e, i) => ({
+              id: `ev-${ai.icd10}-${i}-${Date.now()}`,
+              kind: e.kind,
+              text: e.text,
+              weight: e.weight,
+              source: e.source,
+            }))
+          : prev?.evidence;
+
         return {
           id: prev?.id ?? `h-ai-${idx}-${Date.now()}`,
           label: ai.label,
@@ -392,6 +406,7 @@ export const useSessionStore = create<SessionState>((set) => ({
               ? ai.citations
               : prev?.citations,
           assumptions: mergedAssumptions,
+          evidence: mergedEvidence,
         };
       });
 
@@ -580,6 +595,9 @@ export const useSessionStore = create<SessionState>((set) => ({
         };
       }),
     })),
+
+  preBrief: null,
+  setPreBrief: (brief) => set({ preBrief: brief }),
 
   toasts: [],
   pushToast: (t) =>

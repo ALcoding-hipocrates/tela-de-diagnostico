@@ -63,6 +63,48 @@ export const mockHypotheses: Hypothesis[] = [
         state: "assumed",
       },
     ],
+    evidence: [
+      {
+        id: "e-h1-p1",
+        kind: "positive",
+        text: "PA aferida 150/95 mmHg",
+        weight: 20,
+        source: "sbc-has-2020-crise",
+      },
+      {
+        id: "e-h1-p2",
+        kind: "positive",
+        text: "Formigamento súbito em braço esquerdo",
+        weight: 10,
+        source: "abn-avc-2022",
+      },
+      {
+        id: "e-h1-p3",
+        kind: "positive",
+        text: "Tontura postural confirmada",
+        weight: 8,
+        source: "sbc-has-2020-crise",
+      },
+      {
+        id: "e-h1-n1",
+        kind: "negative",
+        text: "Sem cefaleia pulsátil clássica de enxaqueca",
+        weight: -5,
+      },
+      {
+        id: "e-h1-m1",
+        kind: "missing",
+        text: "Fundo de olho (cruzamento AV, papila)",
+        weight: 12,
+        source: "sbc-has-2020-fo",
+      },
+      {
+        id: "e-h1-m2",
+        kind: "missing",
+        text: "TC crânio se sintoma focal progredir",
+        weight: 25,
+      },
+    ],
   },
   {
     id: "h2",

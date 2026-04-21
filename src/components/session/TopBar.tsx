@@ -12,6 +12,7 @@ import {
   Search,
   ClipboardList,
   Shield,
+  Sparkles,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useSessionStore } from "@/store/sessionStore";
@@ -26,6 +27,7 @@ import { AccountModal } from "./modals/AccountModal";
 import { DocumentModal } from "./modals/DocumentModal";
 import { HandoffModal } from "./modals/HandoffModal";
 import { AuditModal } from "./modals/AuditModal";
+import { PreBriefModal } from "./modals/PreBriefModal";
 
 function mergeSoap(
   ai: SoapSections | null,
@@ -57,6 +59,16 @@ export function TopBar() {
         <div className="flex items-center gap-2">
           <CommandTrigger onClick={() => openModal("commandPalette")} />
           <Timer />
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label="Brief pré-consulta"
+            title="Gerar brief com notas prévias antes de iniciar"
+            onClick={() => openModal("preBrief")}
+            leadingIcon={<Sparkles size={13} />}
+          >
+            Brief
+          </Button>
           <Button
             variant="secondary"
             size="sm"
@@ -128,6 +140,10 @@ export function TopBar() {
       />
       <AuditModal
         open={activeModal === "audit"}
+        onClose={closeModal}
+      />
+      <PreBriefModal
+        open={activeModal === "preBrief"}
         onClose={closeModal}
       />
     </>
