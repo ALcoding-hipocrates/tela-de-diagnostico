@@ -167,7 +167,18 @@ export const useSessionStore = create<SessionState>((set) => ({
   analysisState: "idle",
   setAnalysisState: (s) => set({ analysisState: s }),
 
-  soapSections: null,
+  // Mock inicial com citations inline [^guide-id] pra demonstrar F3.
+  // Em produção, a IA gera isso via tool call; aqui deixamos pra preview.
+  soapSections: {
+    subjective:
+      "Paciente feminina, 58 anos, refere cefaleia frontal há 3 dias, associada a tontura postural ao levantar rápido e formigamento leve em braço esquerdo na véspera[^abn-cefaleia-2022]. Nega febre, náuseas, alteração visual ou déficit focal aparente.",
+    objective:
+      "PA aferida 150/95 mmHg em repouso[^sbc-has-2020-crise]. Demais sinais vitais não aferidos. Exame neurológico sumário sem déficit focal aparente à avaliação inicial.",
+    assessment:
+      "1) Crise hipertensiva (I10) — PA elevada + sintomas associados de cefaleia e tontura postural[^sbc-has-2020-crise]. 2) Cefaleia tensional (G44.2) — considerar se PA normalizar. 3) Afastar evento vascular agudo pelo formigamento de braço esquerdo de início recente[^abn-avc-2022].",
+    plan:
+      "Aferir PA seriada de 15/15 minutos. ECG 12 derivações pra descartar alteração isquêmica[^sbc-sca-2021]. Considerar anti-hipertensivo EV titulado se PA mantida > 180/110[^sbc-has-2020-crise]. TC crânio se evolução neurológica ou piora do formigamento. Retorno em 48h ou retorno imediato se sinais de alarme.",
+  },
   soapEdits: {},
   setSoapEdit: (section, text) =>
     set((s) => ({ soapEdits: { ...s.soapEdits, [section]: text } })),

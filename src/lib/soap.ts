@@ -126,7 +126,27 @@ export function buildSoap(input: BuildSoapInput): SoapContent {
       pendingItems,
       prescriptions: input.prescriptions,
     },
-    narrativeSections: input.narrativeSections ?? null,
+    narrativeSections: stripNarrativeMarkers(input.narrativeSections),
+  };
+}
+
+/**
+ * F3 — Strip `[^guide-id]` citation markers from SOAP narrative before
+ * exporting to PDF / FHIR / clipboard. Citations are presentation-only
+ * and shouldn't appear in the final document.
+ */
+const CITATION_MARKER = /\[\^([a-zA-Z0-9._-]+)\]/g;
+
+function stripNarrativeMarkers(
+  n: SoapSections | null | undefined
+): SoapSections | null {
+  if (!n) return null;
+  const clean = (s: string) => s.replace(CITATION_MARKER, "").replace(/\s+([,.;:])/g, "$1");
+  return {
+    subjective: clean(n.subjective),
+    objective: clean(n.objective),
+    assessment: clean(n.assessment),
+    plan: clean(n.plan),
   };
 }
 

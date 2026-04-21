@@ -117,10 +117,13 @@ INSTRUÇÕES:
    Retorne array vazio se nenhuma hipótese ativa justifica novos exames. Não duplique exames óbvios do checklist. Máximo 4-5 recomendações por análise.
 
 4. Nota SOAP ao vivo: produza 4 seções em prosa médica natural brasileira. Use terminologia clínica padrão BR (HDA, HPP, HF, HS, sinais vitais, conduta, CID-10). Cada seção de 1 a 4 frases, estilo de prontuário real brasileiro. Use somente o que está no diálogo — NÃO INVENTE dados, sinais, exames ou achados que não foram mencionados:
-   - subjective: Queixa principal e HDA em texto corrido brasileiro. Ex: "Paciente feminina, 58 anos, refere cefaleia frontal há 3 dias, associada a tontura postural e formigamento em braço esquerdo na véspera. Nega febre, náuseas ou alteração visual." Inclua HPP, HF e HS apenas se mencionados.
-   - objective: Sinais vitais e achados do exame físico em estilo de prontuário. Ex: "PA 150/95 mmHg em repouso. Demais sinais vitais não aferidos. Exame neurológico sumário sem déficit focal aparente à avaliação inicial."
-   - assessment: Síntese das hipóteses ativas em ordem de probabilidade, com CID-10 entre parênteses. Ex: "1) Crise hipertensiva (I10) — PA elevada + sintomas associados. 2) Cefaleia tensional (G44.2) — considerar se PA normalizar."
-   - plan: Conduta em itens curtos — exames solicitados, prescrições, orientações, retorno, pontos de atenção (red flags). Ex: "Aferir PA seriada. ECG 12 derivações. Considerar anti-hipertensivo titulado EV se PA mantida > 180/110. Investigar sinais focais — TC crânio se evolução neurológica."
+   - subjective: Queixa principal e HDA em texto corrido brasileiro. Ex: "Paciente feminina, 58 anos, refere cefaleia frontal há 3 dias, associada a tontura postural[^abn-cefaleia-2022] e formigamento em braço esquerdo na véspera. Nega febre, náuseas ou alteração visual." Inclua HPP, HF e HS apenas se mencionados.
+   - objective: Sinais vitais e achados do exame físico em estilo de prontuário. Ex: "PA 150/95 mmHg em repouso[^sbc-has-2020-crise]. Demais sinais vitais não aferidos. Exame neurológico sumário sem déficit focal aparente à avaliação inicial."
+   - assessment: Síntese das hipóteses ativas em ordem de probabilidade, com CID-10 entre parênteses. Ex: "1) Crise hipertensiva (I10) — PA elevada + sintomas associados[^sbc-has-2020-crise]. 2) Cefaleia tensional (G44.2) — considerar se PA normalizar."
+   - plan: Conduta em itens curtos — exames solicitados, prescrições, orientações, retorno, pontos de atenção (red flags). Ex: "Aferir PA seriada. ECG 12 derivações[^sbc-sca-2021]. Considerar anti-hipertensivo titulado EV se PA mantida > 180/110[^sbc-has-2020-crise]. Investigar sinais focais — TC crânio se evolução neurológica."
+
+   CITATIONS INLINE (IMPORTANTE): dentro do texto de cada seção, quando uma afirmação clínica é suportada por um guideline da BIBLIOTECA, adicione um marcador `[^guideline-id]` LOGO APÓS a afirmação (colado, sem espaço antes). Use os IDs EXATOS da biblioteca (as chaves entre colchetes). Pode haver múltiplos marcadores na mesma frase. Marque afirmações clinicamente relevantes (diagnóstico, conduta, limite numérico), não afirmações descritivas triviais. Se a afirmação não se apoia em nenhum guideline da biblioteca, omita o marcador.
+
    Se uma seção ainda não tem informação suficiente, retorne string vazia.
 
 Princípios:

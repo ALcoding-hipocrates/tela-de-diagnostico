@@ -13,6 +13,7 @@ import { useSessionStore } from "@/store/sessionStore";
 import type { SoapSections } from "@/types/session";
 import { defaultConsultationTuss } from "@/data/tussCodes";
 import { cn } from "@/lib/cn";
+import { CitedText, stripCitationMarkers } from "../shared/CitedText";
 
 type SectionKey = keyof SoapSections;
 
@@ -171,7 +172,7 @@ function SoapSection({
   const copy = async () => {
     if (!hasContent) return;
     try {
-      await navigator.clipboard.writeText(effectiveText);
+      await navigator.clipboard.writeText(stripCitationMarkers(effectiveText));
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -313,9 +314,12 @@ function SoapSection({
           )}
         >
           {hasContent ? (
-            <p className="whitespace-pre-wrap text-[13px] font-medium leading-relaxed text-ink-900">
-              {effectiveText}
-            </p>
+            <div className="text-[13px] font-medium leading-relaxed text-ink-900">
+              <CitedText
+                text={effectiveText}
+                showReferences={!isEdited}
+              />
+            </div>
           ) : (
             <p className="text-[12px] italic leading-snug text-ink-400">{hint}</p>
           )}
