@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useSessionStore } from "@/store/sessionStore";
-import { mockPatient } from "@/mocks/session";
 import type { SoapSections } from "@/types/session";
 import { cn } from "@/lib/cn";
 import { InfoPopover } from "./shared/InfoPopover";
@@ -54,10 +53,8 @@ export function TopBar() {
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-black/[0.06] bg-surface px-5">
         <div className="flex items-center gap-3">
           <Logo />
-          <SessionBadge />
           <SpecialtyPicker />
         </div>
-        <PatientCard />
         <div className="flex items-center gap-2">
           <CommandTrigger onClick={() => openModal("commandPalette")} />
           <Timer />
@@ -183,87 +180,6 @@ function Logo() {
         Hipócrates<span className="text-clinical">.ai</span>
       </span>
     </div>
-  );
-}
-
-function SessionBadge() {
-  return (
-    <div
-      className="flex items-center gap-1.5 rounded-full bg-clinical/10 px-2.5 py-1"
-      aria-label="Sessão ativa"
-    >
-      <span className="relative flex h-1.5 w-1.5">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-clinical opacity-60" />
-        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-clinical" />
-      </span>
-      <span className="text-[11px] font-semibold text-clinical-700">
-        Sessão ativa
-      </span>
-    </div>
-  );
-}
-
-function PatientCard() {
-  const vitals = mockPatient.vitals ?? [];
-  return (
-    <div className="flex items-center gap-3">
-      <div
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-ink-900 text-[12px] font-bold text-white"
-        aria-hidden
-      >
-        {mockPatient.initials}
-      </div>
-      <div className="flex flex-col leading-tight">
-        <span className="text-[14px] font-bold tracking-tight text-ink-900">
-          {mockPatient.name}
-        </span>
-        <span className="flex items-center gap-1.5 text-[11px] font-medium text-ink-600">
-          <span>{mockPatient.sex === "F" ? "F" : "M"}</span>
-          <Separator />
-          <span>{mockPatient.age} anos</span>
-          <Separator />
-          <span className="font-mono text-[10.5px] text-ink-400">
-            #{mockPatient.id}
-          </span>
-          {vitals.length > 0 && (
-            <>
-              <Separator />
-              {vitals.map((v, i) => (
-                <VitalChip key={i} vital={v} />
-              ))}
-            </>
-          )}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function Separator() {
-  return <span className="h-2.5 w-px bg-ink-400/30" aria-hidden />;
-}
-
-function VitalChip({ vital }: { vital: NonNullable<typeof mockPatient.vitals>[number] }) {
-  const cfg =
-    vital.tone === "danger"
-      ? "text-danger"
-      : vital.tone === "warning"
-        ? "text-warning"
-        : "text-ink-900";
-  return (
-    <span className="inline-flex items-baseline gap-0.5">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-400">
-        {vital.label}
-      </span>
-      <span
-        className={cn(
-          "font-mono text-[11px] font-bold tabular-nums",
-          cfg
-        )}
-      >
-        {vital.value}
-      </span>
-    </span>
   );
 }
 

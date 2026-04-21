@@ -12,6 +12,7 @@ import { detectCriticalMoments } from "@/lib/criticalMoments";
 import { cn } from "@/lib/cn";
 import { CriticalMomentsSummarySlot } from "./CriticalMomentsSummarySlot";
 import { BillingLive } from "./BillingLive";
+import { PatientCard } from "./PatientCard";
 
 /**
  * SummaryBar estilo mockup Hipócrates: 4 pill cards com marcador colorido
@@ -35,10 +36,12 @@ export function SummaryBar() {
 
   return (
     <header
-      className="flex h-[72px] shrink-0 items-center gap-2 border-b border-black/[0.06] bg-surface-raised/40 px-5"
+      className="flex h-[76px] shrink-0 items-center gap-3 border-b border-black/[0.06] bg-surface-raised/40 px-5"
       aria-label="Resumo rápido da sessão"
       data-tour="summary"
     >
+      <PatientCard />
+      <span className="h-10 w-px shrink-0 bg-black/[0.08] mx-1" aria-hidden />
       {activeMoments.length > 0 ? (
         <CriticalMomentsSummarySlot moments={activeMoments} />
       ) : (
