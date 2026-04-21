@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Shield,
   Sparkles,
+  MoreHorizontal,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useSessionStore } from "@/store/sessionStore";
@@ -103,43 +104,11 @@ export function TopBar() {
               description="Gere documentos a partir da consulta: nota SOAP em PDF, FHIR Bundle pra prontuários (Tasy/MV/iClinic/Amplimed), resumo pós-consulta pro paciente (AVS) ou carta de encaminhamento pra especialista."
             />
           </div>
-          <div className="flex items-center gap-0.5">
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label="Auditoria"
-              title="Rastro de auditoria do raciocínio"
-              onClick={() => openModal("audit")}
-              className="h-8 w-8 px-0"
-            >
-              <Shield size={16} />
-            </Button>
-            <InfoPopover
-              align="right"
-              title="Auditoria de raciocínio"
-              description="Rastro completo de cada decisão da IA nesta consulta: atualizações de confiança, diretrizes consultadas, premissas verificadas/contestadas, red flags detectadas. Exportável em markdown — CFM-friendly, audit-ready."
-            />
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Configurações"
-            title="Configurações"
-            onClick={() => openModal("settings")}
-            className="h-8 w-8 px-0"
-          >
-            <Settings size={16} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Conta"
-            title="Conta"
-            onClick={() => openModal("account")}
-            className="h-8 w-8 px-0"
-          >
-            <UserCircle size={16} />
-          </Button>
+          <OverflowMenu
+            onAudit={() => openModal("audit")}
+            onSettings={() => openModal("settings")}
+            onAccount={() => openModal("account")}
+          />
         </div>
       </header>
       <SettingsModal open={activeModal === "settings"} onClose={closeModal} />
@@ -433,6 +402,109 @@ function MenuItem({ icon, label, description, onClick }: MenuItemProps) {
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="text-[13px] font-semibold text-ink-900">{label}</span>
         <span className="text-[11px] leading-snug text-ink-600">
+          {description}
+        </span>
+      </div>
+    </button>
+  );
+}
+
+interface OverflowMenuProps {
+  onAudit: () => void;
+  onSettings: () => void;
+  onAccount: () => void;
+}
+
+function OverflowMenu({ onAudit, onSettings, onAccount }: OverflowMenuProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const pick = (fn: () => void) => () => {
+    setOpen(false);
+    fn();
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label="Mais opções"
+        title="Mais opções"
+        onClick={() => setOpen((v) => !v)}
+        className="h-8 w-8 px-0"
+      >
+        <MoreHorizontal size={16} />
+      </Button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-30 mt-2 w-[220px] overflow-hidden rounded-lg border border-black/[0.08] bg-surface text-left shadow-xl animate-pop-in"
+        >
+          <OverflowItem
+            icon={<Shield size={14} />}
+            label="Auditoria"
+            description="Rastro de cada decisão da IA"
+            onClick={pick(onAudit)}
+          />
+          <OverflowItem
+            icon={<Settings size={14} />}
+            label="Configurações"
+            description="API, dark mode, reset"
+            onClick={pick(onSettings)}
+          />
+          <OverflowItem
+            icon={<UserCircle size={14} />}
+            label="Conta"
+            description="Perfil do médico"
+            onClick={pick(onAccount)}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OverflowItem({
+  icon,
+  label,
+  description,
+  onClick,
+}: {
+  icon: ReactNode;
+  label: string;
+  description: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      className="flex w-full items-start gap-2.5 border-b border-black/[0.04] px-3 py-2.5 text-left transition-colors last:border-b-0 hover:bg-surface-raised"
+    >
+      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-ink-900/[0.05] text-ink-600">
+        {icon}
+      </span>
+      <div className="flex min-w-0 flex-col">
+        <span className="text-[12.5px] font-semibold text-ink-900">{label}</span>
+        <span className="text-[10.5px] leading-snug text-ink-400">
           {description}
         </span>
       </div>

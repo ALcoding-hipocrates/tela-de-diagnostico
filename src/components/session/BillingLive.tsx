@@ -106,53 +106,45 @@ export function BillingLive() {
         aria-expanded={open}
         aria-haspopup="dialog"
         className={cn(
-          "flex h-8 items-center gap-2 rounded-full border px-3 text-[11.5px] font-semibold transition-colors",
+          "relative flex h-9 w-9 items-center justify-center rounded-full border transition-colors",
           ready
             ? "border-clinical/30 bg-clinical/[0.06] text-clinical-700 hover:bg-clinical/[0.1]"
             : "border-warning/30 bg-warning/[0.06] text-warning hover:bg-warning/[0.1]"
         )}
-        title={ready ? "Consulta faturável" : `${unmetRequired.length} requisito(s) TISS pendente(s)`}
+        title={
+          ready
+            ? `Consulta faturável · R$ ${ESTIMATED_VALUE_BRL} · TUSS ${defaultConsultationTuss.code}${primaryCid ? ` · CID ${primaryCid.icd10}` : ""}`
+            : `${unmetRequired.length} requisito(s) TISS pendente(s) — clique pra ver`
+        }
       >
-        <Receipt size={12} />
-        <span className="font-mono tracking-tight">
-          TUSS {defaultConsultationTuss.code}
+        <Receipt size={14} />
+        <span
+          className={cn(
+            "absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-surface ring-1",
+            ready ? "ring-clinical/40" : "ring-warning/40"
+          )}
+          aria-hidden
+        >
+          {ready ? (
+            <Check size={9} strokeWidth={3} className="text-clinical-700" />
+          ) : (
+            <AlertCircle size={9} className="text-warning" />
+          )}
         </span>
-        {primaryCid && (
-          <>
-            <span className="text-ink-400">·</span>
-            <span className="font-mono tracking-tight">
-              CID {primaryCid.icd10}
-            </span>
-          </>
-        )}
-        {secondaryCids.length > 0 && (
-          <span className="text-[10px] font-medium text-ink-400">
-            +{secondaryCids.length}
-          </span>
-        )}
-        <span className="mx-0.5 h-3 w-px bg-current opacity-30" aria-hidden />
-        {ready ? (
-          <span className="flex items-center gap-1">
-            <Check size={11} />
-            R$ {ESTIMATED_VALUE_BRL}
-          </span>
-        ) : (
-          <span className="flex items-center gap-1">
-            <AlertCircle size={11} />
-            {unmetRequired.length} pendente
-            {unmetRequired.length > 1 ? "s" : ""}
-          </span>
-        )}
         <ChevronDown
-          size={11}
-          className={cn("transition-transform", open && "rotate-180")}
+          size={9}
+          className={cn(
+            "absolute -bottom-1 text-ink-400 transition-transform",
+            open && "rotate-180"
+          )}
+          aria-hidden
         />
       </button>
 
       {open && (
         <div
           role="dialog"
-          className="absolute bottom-full left-1/2 z-30 mb-2 w-[360px] -translate-x-1/2 overflow-hidden rounded-[16px] border border-black/[0.08] bg-surface shadow-2xl animate-pop-in"
+          className="absolute right-0 top-full z-30 mt-2 w-[360px] overflow-hidden rounded-[16px] border border-black/[0.08] bg-surface shadow-2xl animate-pop-in"
         >
           <header className="border-b border-black/[0.06] bg-surface-raised px-4 py-3">
             <div className="flex items-center gap-2">
