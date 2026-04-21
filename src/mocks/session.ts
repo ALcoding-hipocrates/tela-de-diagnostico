@@ -7,6 +7,12 @@ import type {
   TranscriptItem,
 } from "@/types/session";
 
+export interface MockVital {
+  label: string; // "PA", "FC", "SpO₂", "T", "FR"
+  value: string; // "150/95", "88", "97%", "37.1", "16"
+  tone: "danger" | "warning" | "normal";
+}
+
 export interface MockPatient {
   name: string;
   initials: string;
@@ -14,6 +20,8 @@ export interface MockPatient {
   sex: "F" | "M";
   id: string;
   tags: Array<"pregnant" | "pediatric" | "elderly" | "renal-failure" | "hepatic-failure">;
+  /** Sinais vitais aferidos mais recentes, renderizados inline no patient card. */
+  vitals?: MockVital[];
 }
 
 export const mockPatient: MockPatient = {
@@ -23,6 +31,10 @@ export const mockPatient: MockPatient = {
   sex: "F",
   id: "PT-00128",
   tags: [],
+  vitals: [
+    { label: "PA", value: "150/95", tone: "danger" },
+    { label: "FC", value: "88", tone: "normal" },
+  ],
 };
 
 export const mockHypotheses: Hypothesis[] = [

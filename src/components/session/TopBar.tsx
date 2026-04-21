@@ -204,27 +204,66 @@ function SessionBadge() {
 }
 
 function PatientCard() {
+  const vitals = mockPatient.vitals ?? [];
   return (
-    <div className="flex items-center gap-2 rounded-full border border-black/[0.08] bg-surface py-0.5 pl-0.5 pr-3">
+    <div className="flex items-center gap-3">
       <div
-        className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-900 text-[11px] font-bold text-white ring-1 ring-white"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-ink-900 text-[12px] font-bold text-white"
         aria-hidden
       >
         {mockPatient.initials}
       </div>
-      <div className="flex items-baseline gap-1.5 leading-tight">
-        <span className="text-[13px] font-bold tracking-tight text-ink-900">
+      <div className="flex flex-col leading-tight">
+        <span className="text-[14px] font-bold tracking-tight text-ink-900">
           {mockPatient.name}
         </span>
-        <span className="text-[11px] font-medium text-ink-600">
-          {mockPatient.sex === "F" ? "F" : "M"} · {mockPatient.age}a
-        </span>
-        <span className="h-2.5 w-px bg-ink-400/30" aria-hidden />
-        <span className="font-mono text-[10.5px] text-ink-400">
-          #{mockPatient.id}
+        <span className="flex items-center gap-1.5 text-[11px] font-medium text-ink-600">
+          <span>{mockPatient.sex === "F" ? "F" : "M"}</span>
+          <Separator />
+          <span>{mockPatient.age} anos</span>
+          <Separator />
+          <span className="font-mono text-[10.5px] text-ink-400">
+            #{mockPatient.id}
+          </span>
+          {vitals.length > 0 && (
+            <>
+              <Separator />
+              {vitals.map((v, i) => (
+                <VitalChip key={i} vital={v} />
+              ))}
+            </>
+          )}
         </span>
       </div>
     </div>
+  );
+}
+
+function Separator() {
+  return <span className="h-2.5 w-px bg-ink-400/30" aria-hidden />;
+}
+
+function VitalChip({ vital }: { vital: NonNullable<typeof mockPatient.vitals>[number] }) {
+  const cfg =
+    vital.tone === "danger"
+      ? "text-danger"
+      : vital.tone === "warning"
+        ? "text-warning"
+        : "text-ink-900";
+  return (
+    <span className="inline-flex items-baseline gap-0.5">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-400">
+        {vital.label}
+      </span>
+      <span
+        className={cn(
+          "font-mono text-[11px] font-bold tabular-nums",
+          cfg
+        )}
+      >
+        {vital.value}
+      </span>
+    </span>
   );
 }
 

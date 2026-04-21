@@ -90,7 +90,6 @@ export function SpecialtyPicker() {
         title="Modo especialidade"
         description="Filtra diretrizes, calculadoras, CIDs sugeridos e red flags de acordo com sua especialidade. A IA passa a considerar o contexto clínico adequado — Cardio, Neuro, Pediatria, Psiquiatria, Emergência ou Geral."
       />
-    </div>
 
       {open && (
         <div

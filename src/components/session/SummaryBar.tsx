@@ -1,11 +1,4 @@
-import {
-  AlertTriangle,
-  Activity,
-  ShieldCheck,
-  ClipboardList,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useMemo, type ReactNode } from "react";
 import type { Hypothesis } from "@/types/session";
 import { useSessionStore } from "@/store/sessionStore";
@@ -20,6 +13,10 @@ import { cn } from "@/lib/cn";
 import { CriticalMomentsSummarySlot } from "./CriticalMomentsSummarySlot";
 import { BillingLive } from "./BillingLive";
 
+/**
+ * SummaryBar estilo mockup Hipócrates: 4 pill cards com marcador colorido
+ * e label uppercase pequeno, value destacado. Mostra BillingLive ao final.
+ */
 export function SummaryBar() {
   const hypotheses = useSessionStore((s) => s.hypotheses);
   const checklist = useSessionStore((s) => s.checklist);
@@ -38,133 +35,149 @@ export function SummaryBar() {
 
   return (
     <header
-      className="flex h-14 shrink-0 items-center gap-6 border-b border-black/[0.06] bg-surface px-6"
+      className="flex h-[72px] shrink-0 items-center gap-2 border-b border-black/[0.06] bg-surface-raised/40 px-5"
       aria-label="Resumo rápido da sessão"
       data-tour="summary"
     >
       {activeMoments.length > 0 ? (
         <CriticalMomentsSummarySlot moments={activeMoments} />
       ) : (
-        <SummarySlot
-          icon={<AlertTriangle size={16} />}
+        <SummaryPill
+          marker="danger"
           label="Red flag"
-          content={redFlag ? redFlag.label : "nenhum alerta"}
+          value={redFlag ? `${redFlag.label}` : "—"}
+          subtext={redFlag ? "crítico" : "sem alerta"}
           tone={redFlag ? "danger" : "muted"}
-          className="max-w-[240px]"
         />
       )}
-      <Divider />
-      <SummarySlot
-        icon={<Activity size={16} />}
+
+      <SummaryPill
+        marker="clinical"
         label="Hipótese principal"
-        content={
-          principal ? <HypothesisContent h={principal} /> : "coletando dados…"
-        }
-        className="min-w-0 flex-1"
+        value={principal ? <HypothesisValue h={principal} /> : "coletando…"}
+        subtext={principal && principal.delta !== 0 ? `Δ ${principal.delta > 0 ? "+" : ""}${principal.delta}` : undefined}
+        tone="clinical"
+        grow
       />
-      <Divider />
-      <SummarySlot
-        icon={<ShieldCheck size={16} />}
+
+      <SummaryPill
+        marker={unknown > 0 ? "warning" : "muted"}
         label="Cobertura"
-        content={
+        value={
           unknown > 0 ? (
-            <CounterContent value={unknown} suffix="sem evidência" />
+            <span>
+              <span className="font-mono font-bold tabular-nums text-ink-900">
+                {unknown}
+              </span>
+              <span className="ml-1 text-[11.5px] font-medium text-ink-600">
+                sem evid.
+              </span>
+            </span>
           ) : (
             "completa"
           )
         }
         tone={unknown > 0 ? "warning" : "muted"}
       />
-      <Divider />
-      <SummarySlot
-        icon={<ClipboardList size={16} />}
+
+      <SummaryPill
+        marker="muted"
         label="Pendências"
-        tone="muted"
-        content={
+        value={
           pending > 0 ? (
-            <CounterContent value={pending} suffix={pending === 1 ? "pendente" : "pendentes"} />
+            <span>
+              <span className="font-mono font-bold tabular-nums text-ink-900">
+                {pending}
+              </span>
+              <span className="ml-1 text-[11.5px] font-medium text-ink-600">
+                item{pending === 1 ? "" : "s"}
+              </span>
+            </span>
           ) : (
             "zerado"
           )
         }
+        tone="muted"
       />
-      <Divider />
-      <BillingLive />
+
+      <div className="ml-auto">
+        <BillingLive />
+      </div>
     </header>
   );
 }
 
-interface SummarySlotProps {
-  icon: ReactNode;
+type PillTone = "danger" | "warning" | "clinical" | "muted";
+type PillMarker = "danger" | "warning" | "clinical" | "muted";
+
+interface SummaryPillProps {
+  marker: PillMarker;
   label: string;
-  content: ReactNode;
-  tone?: "default" | "danger" | "warning" | "muted";
-  className?: string;
+  value: ReactNode;
+  subtext?: string;
+  tone: PillTone;
+  grow?: boolean;
 }
 
-function SummarySlot({
-  icon,
-  label,
-  content,
-  tone = "default",
-  className,
-}: SummarySlotProps) {
-  const iconColor =
-    tone === "danger"
-      ? "text-danger"
-      : tone === "warning"
-        ? "text-warning"
-        : tone === "default"
-          ? "text-clinical-700"
-          : "text-ink-600";
+function SummaryPill({ marker, label, value, subtext, tone, grow }: SummaryPillProps) {
+  const markerColor = {
+    danger: "bg-danger",
+    warning: "bg-warning",
+    clinical: "bg-clinical-glow",
+    muted: "bg-ink-400/60",
+  }[marker];
+
+  const valueColor = {
+    danger: "text-danger",
+    warning: "text-warning",
+    clinical: "text-ink-900",
+    muted: "text-ink-900",
+  }[tone];
+
   return (
-    <div className={cn("flex min-w-0 items-center gap-2.5", className)}>
-      <span className={cn("shrink-0", iconColor)}>{icon}</span>
+    <div
+      className={cn(
+        "flex min-w-0 items-start gap-2.5 rounded-[14px] border border-black/[0.05] bg-surface px-3.5 py-2.5",
+        grow && "min-w-0 flex-1"
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn("mt-1 h-2 w-2 shrink-0 rounded-[3px]", markerColor)}
+      />
       <div className="flex min-w-0 flex-col leading-tight">
-        <span className="text-[11.5px] font-medium text-ink-400">
+        <span className="text-[9.5px] font-bold uppercase tracking-[0.08em] text-ink-400">
           {label}
         </span>
         <span
           className={cn(
-            "mt-0.5 truncate text-[13.5px] font-semibold tracking-tight",
-            tone === "danger" ? "text-danger" : "text-ink-900"
+            "mt-0.5 truncate text-[13px] font-semibold tracking-tight",
+            valueColor
           )}
         >
-          {content}
+          {value}
         </span>
+        {subtext && (
+          <span className="text-[10px] font-medium text-ink-400">
+            {subtext}
+          </span>
+        )}
       </div>
     </div>
   );
 }
 
-function HypothesisContent({ h }: { h: Hypothesis }) {
+function HypothesisValue({ h }: { h: Hypothesis }) {
   const up = h.delta > 0;
   const down = h.delta < 0;
   return (
-    <span className="flex min-w-0 items-center gap-1.5 text-ink-900">
-      <span className="truncate font-semibold">{h.label}</span>
-      <span className="shrink-0 font-mono font-semibold">{h.confidence}%</span>
-      {up && <ArrowUpRight size={12} className="shrink-0 text-clinical" />}
-      {down && <ArrowDownRight size={12} className="shrink-0 text-danger" />}
-      {h.trigger && (
-        <span className="min-w-0 truncate text-ink-400">
-          desde{" "}
-          <span className="text-ink-600">{h.trigger}</span>
-        </span>
-      )}
+    <span className="flex min-w-0 items-center gap-1.5">
+      <span className="truncate">{h.label}</span>
+      <span className="shrink-0 font-mono font-bold tabular-nums text-clinical-700">
+        {h.confidence}%
+      </span>
+      {up && <ArrowUpRight size={11} className="shrink-0 text-clinical" />}
+      {down && <ArrowDownRight size={11} className="shrink-0 text-danger" />}
     </span>
   );
-}
-
-function CounterContent({ value, suffix }: { value: number; suffix: string }) {
-  return (
-    <span className="text-ink-900">
-      <span className="font-mono font-semibold">{value}</span>{" "}
-      <span className="text-ink-600">{suffix}</span>
-    </span>
-  );
-}
-
-function Divider() {
-  return <span className="h-7 w-px shrink-0 bg-black/[0.08]" aria-hidden />;
 }
